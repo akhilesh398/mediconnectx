@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MediConnectX Login</title>
+    <!-- Font Awesome CDN for Icons -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Segoe UI", sans-serif;
+      }
+
+      body {
+        background-color: #e0e7ff;
+        min-height: 100vh;
+        transition: background 0.3s;
+        display: flex;
+        flex-direction: column;
+        margin: 0;
+      }
+      
+      .main-content {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-grow: 1;
+      }
+
+      .container {
+        width: 800px;
+        display: flex;
+        background: #fff;
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 0 30px rgba(0, 0, 0, 0.1);
+      }
+
+      .left {
+        flex: 1;
+        background: #3b82f6;
+        color: white;
+        padding: 30px 25px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+      }
+
+      .left img {
+        width: 100%;
+        height: 280px;
+        object-fit: cover;
+        border-radius: 10px;
+        margin-bottom: 20px;
+      }
+
+      .left h2 {
+        font-size: 24px;
+        margin-bottom: 10px;
+      }
+
+      .left p {
+        font-size: 15px;
+        opacity: 0.9;
+      }
+
+      .right {
+        flex: 1;
+        padding: 30px 25px;
+        background-color: #fff;
+        position: relative;
+      }
+
+      .logo {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 30px;
+      }
+
+      .logo img {
+        width: 30px;
+      }
+
+      .logo h1 {
+        font-size: 22px;
+        color: #3b82f6;
+      }
+
+      h2,
+      p,
+      label {
+        color: #1e293b;
+      }
+
+      .input-group {
+        margin-bottom: 20px;
+      }
+
+      .input-group label {
+        display: block;
+        margin-bottom: 6px;
+      }
+
+      .input-group input {
+        width: 100%;
+        padding: 10px 12px;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        outline: none;
+        font-size: 14px;
+      }
+
+      .extra {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+      }
+
+      .extra a {
+        color: #3b82f6;
+        font-size: 13px;
+        text-decoration: none;
+      }
+
+      .btn {
+        width: 100%;
+        padding: 12px;
+        background: #3b82f6;
+        color: white;
+        font-size: 16px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: background 0.3s;
+      }
+
+      .btn:hover {
+        background: #2563eb;
+      }
+
+      .signup {
+        text-align: center;
+        margin-top: 15px;
+        font-size: 14px;
+      }
+
+      .signup a {
+        color: #3b82f6;
+        text-decoration: none;
+      }
+
+      .theme-toggle {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: #f1f5f9;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: background 0.3s;
+      }
+
+      .theme-toggle svg {
+        width: 20px;
+        height: 20px;
+        fill: #1e293b;
+        transition: transform 0.4s;
+      }
+
+      body.dark-mode {
+        background-color: #0f172a;
+      }
+
+      body.dark-mode .container {
+        background: #1e293b;
+      }
+
+      body.dark-mode .right,
+      body.dark-mode .left {
+        background-color: #1e293b;
+        color: white;
+      }
+
+      body.dark-mode .left p,
+      body.dark-mode .left h2,
+      body.dark-mode .right h2,
+      body.dark-mode .right p,
+      body.dark-mode .input-group label {
+        color: #f1f5f9;
+      }
+
+      body.dark-mode .input-group input {
+        background: #334155;
+        border: 1px solid #475569;
+        color: white;
+      }
+
+      body.dark-mode .btn {
+        background: #0ea5e9;
+      }
+
+      body.dark-mode .btn:hover {
+        background: #0284c7;
+      }
+
+      body.dark-mode .theme-toggle {
+        background: #334155;
+      }
+
+      body.dark-mode .theme-toggle svg {
+        fill: #f8fafc;
+        transform: rotate(180deg);
+      }
+      body.dark-mode .right,
+      body.dark-mode .left {
+        background-color: #1265eaff;
+        color: white;
+      }
+      body.dark-mode .right {
+        background-color: #293a56ff;
+        color: white;
+      }
+    </style>
+  </head>
+  <body>
+    {% include "homenav.html" %}
+    
+    <div class="main-content">
+      <div class="container">
+      <div class="left">
+        <img
+          src="https://cdn.pixabay.com/photo/2016/03/31/19/56/avatar-1295431_1280.png"
+          alt="Doctor"
+        />
+        <div>
+          <h2>Welcome to MediConnectX</h2>
+          <p>
+            Hospital Management System<br />
+            Streamline and manage hospital operations with ease and efficiency.
+          </p>
+        </div>
+      </div>
+      <div class="right">
+        <div class="theme-toggle" onclick="toggleTheme()">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="16"
+            height="16"
+            fill="currentColor"
+            class="bi bi-brightness-high-fill"
+            viewBox="0 0 16 16"
+          >
+            <path
+              d="M12 8a4 4 0 1 1-8 0 4 4 0 0 1 8 0M8 0a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 0m0 13a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 13m8-5a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2a.5.5 0 0 1 .5.5M3 8a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2A.5.5 0 0 1 3 8m10.657-5.657a.5.5 0 0 1 0 .707l-1.414 1.415a.5.5 0 1 1-.707-.708l1.414-1.414a.5.5 0 0 1 .707 0m-9.193 9.193a.5.5 0 0 1 0 .707L3.05 13.657a.5.5 0 0 1-.707-.707l1.414-1.414a.5.5 0 0 1 .707 0m9.193 2.121a.5.5 0 0 1-.707 0l-1.414-1.414a.5.5 0 0 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .707M4.464 4.465a.5.5 0 0 1-.707 0L2.343 3.05a.5.5 0 1 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .708"
+            />
+          </svg>
+        </div>
+        <div class="logo">
+          <img
+            src="https://cdn-icons-png.flaticon.com/512/3209/3209265.png"
+            alt="logo"
+          />
+          <h1>MediConnectX</h1>
+        </div>
+        <h2>Login as Doctor</h2>
+        <p>Enter your credentials to login to your account</p>
+        {% if error_message %}
+        <div style="color: red; margin-bottom: 15px;">
+          {{ error_message }}
+        </div>
+        {% endif %}
+        <form method="POST" action="/doctorlogin/">
+          {% csrf_token %}
+          <div class="input-group">
+            <label for="username">Username</label>
+            <input type="text" id="username" name="username" placeholder="Enter your username" required />
+          </div>
+          <div class="input-group">
+            <label for="password">Password</label>
+            <input
+              type="password"
+              id="password"
+              name="password"
+              placeholder="Enter your password"
+              required
+            />
+          </div>
+          <div class="extra">
+            <div></div>
+            <a href="#">Forgot Password?</a>
+          </div>
+          <button type="submit" class="btn">Sign In</button>
+        </form>
+        <div class="signup">
+          Don't have an account? <a href="/doctorsignup">Sign Up</a>
+        </div>
+      </div>
+    </div>
+    </div>
+
+    <script>
+      function toggleTheme() {
+        document.body.classList.toggle("dark-mode");
+      }
+    </script>
+  </body>
+</html>

@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>MediConnectX</title>
+
+    <!-- Font Awesome CDN for Icons -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
+      body {
+        font-family: "Segoe UI", sans-serif;
+        background: linear-gradient(to bottom right, #16ddddff, #8a41b2ff);
+        color: white;
+        min-height: 100vh;
+      }
+
+      .topbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 20px 40px;
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+        background-color: #16ddddff;
+        color: white;
+         
+      }
+
+      .topbar h1 {
+        font-size: 24px;
+        color: white;
+      }
+
+      .topbar a {
+        font-size: 24px;
+        color: white;
+        text-decoration: none;
+      }
+
+      .nav-links a {
+        margin-left: 20px;
+        color: white;
+        text-decoration: none;
+        font-size: 16px;
+      }
+
+      .nav-links a:hover {
+        text-decoration: underline;
+      }
+
+      #hero {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 60px 40px;
+        height: calc(100vh - 80px);
+      }
+
+      .hero-left {
+        width: 60%;
+      }
+
+      .hero-left h2 {
+        font-size: 36px;
+        margin-bottom: 20px;
+      }
+
+      .highlight {
+        color: #ffd700;
+        font-weight: bold;
+      }
+
+      .hero-left p {
+        font-size: 18px;
+        line-height: 1.6;
+        margin-bottom: 30px;
+      }
+
+      .stats {
+        display: flex;
+        gap: 50px;
+        font-size: 18px;
+        margin-bottom: 30px;
+      }
+
+      .stats div {
+        text-align: center;
+      }
+
+      .buttons .btn {
+        text-decoration: none;
+        color: white;
+        padding: 10px 20px;
+        margin-right: 15px;
+        border-radius: 5px;
+        display: inline-block;
+        font-weight: bold;
+        transition: 0.3s ease;
+      }
+
+      .get-started {
+        background-color: #ffd700;
+        color: black;
+      }
+
+      .get-started:hover {
+        background-color: #e6c200;
+      }
+
+      .login {
+        background-color: transparent;
+        border: 2px solid white;
+      }
+
+      .login:hover {
+        background-color: white;
+        color: #0077a3;
+      }
+
+      .search-bar {
+        margin-top: 30px;
+        padding: 10px 15px;
+        width: 200px;
+        border-radius: 5px;
+        border: none;
+        outline: none;
+      }
+
+      .hero-right {
+        width: 30%;
+        text-align: center;
+      }
+
+      .hospital-icon {
+        font-size: 150px;
+        opacity: 0.8;
+        color: white;
+      }
+
+      /* Services Section */
+      #services {
+        padding: 60px 40px;
+        background: white;
+        color: black;
+        text-align: center;
+      }
+
+      #services h2 {
+        font-size: 32px;
+        margin-bottom: 10px;
+      }
+
+      #services p {
+        font-size: 18px;
+        margin-bottom: 40px;
+      }
+
+      .service-grid {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 30px;
+      }
+
+      .service-box {
+        flex: 0 0 300px;
+        background: #f9f9f9;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      }
+
+      .service-box i {
+        font-size: 32px;
+        margin-bottom: 10px;
+      }
+
+      .service-box h3 {
+        margin-bottom: 10px;
+      }
+
+      .service-box p {
+        font-size: 14px;
+        line-height: 1.5;
+      }
+
+      #hospitals,
+      #about {
+        padding: 100px 40px;
+        background: #eee;
+        color: black;
+        text-align: center;
+      }
+
+      /* Partner With Us Section */
+      #partner {
+        padding: 80px 40px;
+        background: #f0f0f0;
+        color: black;
+        text-align: center;
+      }
+
+      #partner a {
+        display: inline-block;
+        margin-top: 20px;
+        padding: 12px 25px;
+        background-color: #007bff;
+        color: white;
+        border-radius: 5px;
+        text-decoration: none;
+      }
+
+      /* Get Started Section */
+      #get-started-section {
+        padding: 60px 20px;
+        background-color: #2196f3;
+        text-align: center;
+        color: white;
+      }
+
+      #get-started-section h2 {
+        font-size: 30px;
+        margin-bottom: 10px;
+      }
+
+      #get-started-section p {
+        font-size: 16px;
+        margin-bottom: 30px;
+      }
+
+      .get-started-buttons {
+        display: flex;
+        justify-content: center;
+        gap: 20px;
+        flex-wrap: wrap;
+      }
+
+      .get-started-buttons a {
+        padding: 12px 20px;
+        border-radius: 6px;
+        text-decoration: none;
+        font-weight: bold;
+      }
+
+      .patient-btn {
+        background-color: #ffc107;
+        color: black;
+      }
+
+      .hospital-btn {
+        background-color: white;
+        color: #007bff;
+      }
+    </style>
+  </head>
+  <body>
+
+     {% include "homenav.html" %}
+    
+
+    <section id="hero">
+      <div class="hero-left">
+        <h2>Welcome to <span class="highlight">MediConnectX </span></h2>
+        <p>
+          Your comprehensive Hospital Management System for seamless healthcare
+          services. Connect with hospitals, book appointments, and manage your
+          health journey with ease.
+        </p>
+        <div class="stats">
+          <div><strong>0</strong><br />Hospitals</div>
+          <div><strong>0</strong><br />Doctors</div>
+          <div><strong>0</strong><br />Appointments</div>
+        </div>
+        <div class="buttons">
+          <a href="patientsignup" class="btn get-started"
+            ><i class="fas fa-user-plus"></i> Get Started</a
+          >
+          <a href="login" class="btn login"
+            ><i class="fas fa-sign-in-alt"></i> Login</a
+          >
+        </div>
+        <input type="text" placeholder="Search" class="search-bar" />
+      </div>
+
+      <div class="hero-right">
+        <i class="fas fa-hospital-alt hospital-icon"></i>
+      </div>
+    </section>
+
+    <!-- Services Section -->
+    <section id="services">
+      <h2>Our Services</h2>
+      <p>Comprehensive healthcare management at your fingertips</p>
+      <div class="service-grid">
+        <div class="service-box">
+          <i class="fas fa-search" style="color: #007bff"></i>
+          <h3>Find Hospitals</h3>
+          <p>
+            Search and discover hospitals by city, specialization, or doctor
+            name. Get detailed information about facilities and services.
+          </p>
+        </div>
+        <div class="service-box">
+          <i class="fas fa-calendar-check" style="color: green"></i>
+          <h3>Book Appointments</h3>
+          <p>
+            Schedule appointments with your preferred doctors at convenient
+            times. Manage all your appointments in one place.
+          </p>
+        </div>
+        <div class="service-box">
+          <i class="fas fa-user-md" style="color: #00bcd4"></i>
+          <h3>Doctor Profiles</h3>
+          <p>
+            View detailed doctor profiles including specializations, experience,
+            and availability to make informed choices.
+          </p>
+        </div>
+        <div class="service-box">
+          <i class="fas fa-hospital-user" style="color: orange"></i>
+          <h3>Hospital Management</h3>
+          <p>
+            Hospitals can manage their profiles, doctor schedules, and
+            appointments efficiently through our platform.
+          </p>
+        </div>
+        <div class="service-box">
+          <i class="fas fa-star" style="color: red"></i>
+          <h3>Feedback System</h3>
+          <p>
+            Share your experiences and help others make better healthcare
+            decisions through our rating and review system.
+          </p>
+        </div>
+        <div class="service-box">
+          <i class="fas fa-shield-alt" style="color: gray"></i>
+          <h3>Secure & Reliable</h3>
+          <p>
+            Your health data is protected with industry-standard security
+            measures and reliable service availability.
+          </p>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Hospitals Section -->
+    <section id="hospitals">
+      <h2>Hospitals</h2>
+      <p>Details about hospitals can go here.</p>
+    </section>
+
+
+    <section id="about">
+      <h2>About Us</h2>
+      <p>MediConnectX is a modern healthcare platform...</p>
+    </section>
+
+    <section id="get-started-section">
+      <h2>Ready to Get Started?</h2>
+      <p>join hands with MediConnectX and Help transform the Future of healthcare by becoming a Hospital Partner.</p>
+      <div class="get-started-buttons">
+        <a href="/doctorlogin" class="patient-btn"><i class="fas fa-user-plus"></i> Login as Doctor</a>
+        <a href="/doctorsignup" class="hospital-btn"><i class="fas fa-hospital"></i> Register Doctor</a>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer style="background-color: rgba(0,0,0,0.3); color: white; padding: 30px 40px; text-align: center;">
+      <div style="margin-bottom: 10px;">
+        <i class="fas fa-hospital" style="font-size: 24px; margin-right: 8px;"></i>
+        <strong>MediConnectX</strong>
+      </div>
+      <p style="font-size: 14px; margin-bottom: 10px;">&copy; 2025 MediConnectX. All rights reserved.</p>
+      <div style="font-size: 16px;">
+        <a href="#services" style="color: white; margin: 0 10px; text-decoration: none;">Services</a>
+        <a href="#hospitals" style="color: white; margin: 0 10px; text-decoration: none;">Hospitals</a>
+        <a href="#about" style="color: white; margin: 0 10px; text-decoration: none;">About</a>
+        <a href="/contact" style="color: white; margin: 0 10px; text-decoration: none;">Contact Us</a>
+        <a href="/login" style="color: white; margin: 0 10px; text-decoration: none;">Login</a>
+      </div>
+    </footer>
+  </body>
+</html>

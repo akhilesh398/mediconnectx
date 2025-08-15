@@ -1,0 +1,744 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="dashboard-container">
+    <div class="sidebar">
+        <div class="logo">
+            <img src="https://cdn-icons-png.flaticon.com/512/942/942748.png" alt="logo">
+            <h1>MediConnectX</h1>
+        </div>
+
+        <a href="{% url 'user_dashboard' %}" class="menu-item">
+            <i class="fas fa-home"></i>
+            <span>Dashboard</span>
+        </a>
+
+        <a href="{% url 'patient_appointments' %}" class="menu-item">
+            <i class="fas fa-calendar-alt"></i>
+            <span>Appointments</span>
+        </a>
+
+        <a href="{% url 'patient_prescriptions' %}" class="menu-item">
+            <i class="fas fa-file-medical"></i>
+            <span>Prescriptions</span>
+        </a>
+
+        <a href="{% url 'patient_medical_records' %}" class="menu-item">
+            <i class="fas fa-notes-medical"></i>
+            <span>Medical Records</span>
+        </a>
+
+        <a href="{% url 'find_doctors' %}" class="menu-item active">
+            <i class="fas fa-user-md"></i>
+            <span>Find Doctors</span>
+        </a>
+
+        <a href="{% url 'patient_profile' %}" class="menu-item">
+            <i class="fas fa-user"></i>
+            <span>Profile</span>
+        </a>
+
+        <a href="/logout/patient/" class="logout-btn">
+            <i class="fas fa-sign-out-alt"></i>
+            <span>Logout</span>
+        </a>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Header -->
+        <div class="header">
+            <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" placeholder="Search doctors...">
+            </div>
+            <div class="user-info">
+                <div class="notification">
+                    <i class="fas fa-bell"></i>
+                    <span class="badge">3</span>
+                </div>
+                <div class="user">
+                    <img src="https://via.placeholder.com/40" alt="User">
+                    <span>{{ patient.full_name }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Content -->
+        <div class="content">
+            <div class="page-title">
+                <h2>Find Doctors</h2>
+            </div>
+
+            <!-- Search and Filter Section -->
+            <div class="search-filter-section">
+                <form method="get" action="{% url 'find_doctors' %}" class="search-form">
+                    <div class="search-filter-row">
+                        <div class="search-filter-group">
+                            <label for="specialization">Specialization</label>
+                            <select id="specialization" name="specialization">
+                                <option value="">All Specializations</option>
+                                <option value="Cardiologist" {% if specialization == 'Cardiologist' %}selected{% endif %}>Cardiologist</option>
+                                <option value="Dermatologist" {% if specialization == 'Dermatologist' %}selected{% endif %}>Dermatologist</option>
+                                <option value="Neurologist" {% if specialization == 'Neurologist' %}selected{% endif %}>Neurologist</option>
+                                <option value="Orthopedic" {% if specialization == 'Orthopedic' %}selected{% endif %}>Orthopedic</option>
+                                <option value="Pediatrician" {% if specialization == 'Pediatrician' %}selected{% endif %}>Pediatrician</option>
+                                <option value="Psychiatrist" {% if specialization == 'Psychiatrist' %}selected{% endif %}>Psychiatrist</option>
+                                <option value="Gynecologist" {% if specialization == 'Gynecologist' %}selected{% endif %}>Gynecologist</option>
+                                <option value="Ophthalmologist" {% if specialization == 'Ophthalmologist' %}selected{% endif %}>Ophthalmologist</option>
+                                <option value="Dentist" {% if specialization == 'Dentist' %}selected{% endif %}>Dentist</option>
+                                <option value="General Physician" {% if specialization == 'General Physician' %}selected{% endif %}>General Physician</option>
+                            </select>
+                        </div>
+                        <div class="search-filter-group">
+                            <label for="city">City</label>
+                            <select id="city" name="city">
+                                <option value="">All Cities</option>
+                                <option value="Mumbai" {% if city == 'Mumbai' %}selected{% endif %}>Mumbai</option>
+                                <option value="Delhi" {% if city == 'Delhi' %}selected{% endif %}>Delhi</option>
+                                <option value="Bangalore" {% if city == 'Bangalore' %}selected{% endif %}>Bangalore</option>
+                                <option value="Hyderabad" {% if city == 'Hyderabad' %}selected{% endif %}>Hyderabad</option>
+                                <option value="Chennai" {% if city == 'Chennai' %}selected{% endif %}>Chennai</option>
+                                <option value="Kolkata" {% if city == 'Kolkata' %}selected{% endif %}>Kolkata</option>
+                                <option value="Pune" {% if city == 'Pune' %}selected{% endif %}>Pune</option>
+                                <option value="Ahmedabad" {% if city == 'Ahmedabad' %}selected{% endif %}>Ahmedabad</option>
+                                <option value="Jaipur" {% if city == 'Jaipur' %}selected{% endif %}>Jaipur</option>
+                                <option value="Lucknow" {% if city == 'Lucknow' %}selected{% endif %}>Lucknow</option>
+                            </select>
+                        </div>
+                        <div class="search-filter-group">
+                            <label>&nbsp;</label>
+                            <button type="submit" class="btn-primary"><i class="fas fa-search"></i> Search</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Doctors Grid -->
+            <div class="doctors-grid">
+                {% if doctors %}
+                    {% for doctor in doctors %}
+                        <div class="doctor-card">
+                            <div class="doctor-avatar">
+                                <img src="https://via.placeholder.com/150" alt="{{ doctor.full_name }}">
+                            </div>
+                            <div class="doctor-info">
+                                <h3>Dr. {{ doctor.full_name }}</h3>
+                                <p class="doctor-specialization">{{ doctor.specialization }}</p>
+                                <p class="doctor-location"><i class="fas fa-map-marker-alt"></i> {{ doctor.city }}</p>
+                                <p class="doctor-contact"><i class="fas fa-phone"></i> {{ doctor.phone }}</p>
+                                <p class="doctor-email"><i class="fas fa-envelope"></i> {{ doctor.email }}</p>
+                            </div>
+                            <div class="doctor-actions">
+                                <button class="btn-primary" onclick="bookAppointment('{{ doctor.id }}')"><i class="fas fa-calendar-plus"></i> Book Appointment</button>
+                                <button class="btn-outline" onclick="viewDoctorProfile('{{ doctor.id }}')"><i class="fas fa-user-md"></i> View Profile</button>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="no-data">
+                        <i class="fas fa-user-md large-icon"></i>
+                        <h3>No Doctors Found</h3>
+                        <p>Try adjusting your search criteria or check back later.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Doctor Profile Modal -->
+<div id="doctor-profile-modal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeDoctorProfileModal()">&times;</span>
+        <div id="doctor-profile-content">
+            <!-- This will be populated dynamically -->
+        </div>
+    </div>
+</div>
+
+<!-- Book Appointment Modal -->
+<div id="book-appointment-modal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeBookAppointmentModal()">&times;</span>
+        <h2>Book an Appointment</h2>
+        <form id="appointment-form" method="post" action="{% url 'patient_appointments' %}">
+            {% csrf_token %}
+            <input type="hidden" id="doctor_id" name="doctor">
+            <div class="form-group">
+                <label for="appointment_date">Appointment Date</label>
+                <input type="date" id="appointment_date" name="appointment_date" required>
+            </div>
+            <div class="form-group">
+                <label for="appointment_time">Appointment Time</label>
+                <input type="time" id="appointment_time" name="appointment_time" required>
+            </div>
+            <div class="form-group">
+                <label for="reason">Reason for Visit</label>
+                <textarea id="reason" name="reason" rows="3" required></textarea>
+            </div>
+            <div class="form-actions">
+                <button type="button" class="btn-secondary" onclick="closeBookAppointmentModal()">Cancel</button>
+                <button type="submit" class="btn-primary">Book Appointment</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    /* Dashboard Container */
+    .dashboard-container {
+        display: flex;
+        min-height: 100vh;
+        background-color: #f5f5f5;
+    }
+
+    /* Sidebar */
+    .sidebar {
+        width: 250px;
+        background-color: #2c3e50;
+        color: #fff;
+        padding: 20px 0;
+        position: fixed;
+        height: 100%;
+        overflow-y: auto;
+    }
+
+    .logo {
+        text-align: center;
+        padding-bottom: 20px;
+        border-bottom: 1px solid #3a546a;
+    }
+
+    .menu {
+        list-style: none;
+        padding: 0;
+        margin: 20px 0;
+    }
+
+    .menu li {
+        padding: 10px 20px;
+        transition: all 0.3s;
+    }
+
+    .menu li.active {
+        background-color: #3a546a;
+        border-left: 4px solid #3498db;
+    }
+
+    .menu li a {
+        color: #fff;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+    }
+
+    .menu li a i {
+        margin-right: 10px;
+        width: 20px;
+    }
+
+    /* Main Content */
+    .main-content {
+        flex: 1;
+        margin-left: 250px;
+        padding: 20px;
+    }
+
+    /* Header */
+    .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-bottom: 20px;
+        border-bottom: 1px solid #e0e0e0;
+        margin-bottom: 20px;
+    }
+
+    .search-box {
+        display: flex;
+        align-items: center;
+        background-color: #fff;
+        border-radius: 4px;
+        padding: 8px 15px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        width: 300px;
+    }
+
+    .search-box input {
+        border: none;
+        outline: none;
+        margin-left: 10px;
+        width: 100%;
+    }
+
+    .user-info {
+        display: flex;
+        align-items: center;
+    }
+
+    .notification {
+        position: relative;
+        margin-right: 20px;
+    }
+
+    .badge {
+        position: absolute;
+        top: -8px;
+        right: -8px;
+        background-color: #e74c3c;
+        color: #fff;
+        border-radius: 50%;
+        width: 18px;
+        height: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+    }
+
+    .user {
+        display: flex;
+        align-items: center;
+    }
+
+    .user img {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        margin-right: 10px;
+    }
+
+    /* Content */
+    .content {
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        padding: 20px;
+    }
+
+    .page-title {
+        margin-bottom: 20px;
+    }
+
+    .page-title h2 {
+        margin: 0;
+        color: #2c3e50;
+    }
+
+    /* Search and Filter Section */
+    .search-filter-section {
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+
+    .search-form {
+        width: 100%;
+    }
+
+    .search-filter-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 15px;
+    }
+
+    .search-filter-group {
+        flex: 1;
+        min-width: 200px;
+    }
+
+    .search-filter-group label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 500;
+        color: #495057;
+    }
+
+    .search-filter-group select,
+    .search-filter-group input {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        background-color: #fff;
+    }
+
+    /* Doctors Grid */
+    .doctors-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 20px;
+        margin-top: 20px;
+    }
+
+    .doctor-card {
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        transition: transform 0.3s, box-shadow 0.3s;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .doctor-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .doctor-avatar {
+        text-align: center;
+        padding: 20px 0;
+        background-color: #f8f9fa;
+    }
+
+    .doctor-avatar img {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 4px solid #fff;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .doctor-info {
+        padding: 20px;
+        flex-grow: 1;
+    }
+
+    .doctor-info h3 {
+        margin: 0 0 10px 0;
+        color: #2c3e50;
+        font-size: 18px;
+    }
+
+    .doctor-specialization {
+        color: #3498db;
+        font-weight: 500;
+        margin-bottom: 10px;
+    }
+
+    .doctor-location,
+    .doctor-contact,
+    .doctor-email {
+        margin: 5px 0;
+        color: #6c757d;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .doctor-actions {
+        padding: 15px;
+        border-top: 1px solid #e9ecef;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    /* No Data */
+    .no-data {
+        text-align: center;
+        padding: 40px 20px;
+        color: #6c757d;
+        grid-column: 1 / -1;
+    }
+
+    .large-icon {
+        font-size: 48px;
+        margin-bottom: 15px;
+        color: #adb5bd;
+    }
+
+    /* Buttons */
+    .btn-primary {
+        background-color: #3498db;
+        color: #fff;
+        border: none;
+        padding: 10px 15px;
+        border-radius: 4px;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 5px;
+        width: 100%;
+    }
+
+    .btn-primary:hover {
+        background-color: #2980b9;
+    }
+
+    .btn-secondary {
+        background-color: #95a5a6;
+        color: #fff;
+        border: none;
+        padding: 10px 15px;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+
+    .btn-secondary:hover {
+        background-color: #7f8c8d;
+    }
+
+    .btn-outline {
+        background-color: transparent;
+        color: #555;
+        border: 1px solid #ddd;
+        padding: 10px 15px;
+        border-radius: 4px;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 5px;
+        width: 100%;
+    }
+
+    .btn-outline:hover {
+        background-color: #f5f5f5;
+    }
+
+    /* Modal */
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+    }
+
+    .modal-content {
+        background-color: #fff;
+        margin: 10% auto;
+        padding: 20px;
+        border-radius: 8px;
+        width: 500px;
+        max-width: 90%;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        position: relative;
+    }
+
+    .close {
+        position: absolute;
+        right: 20px;
+        top: 15px;
+        font-size: 24px;
+        cursor: pointer;
+    }
+
+    .form-group {
+        margin-bottom: 15px;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: 500;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+    }
+
+    .form-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        margin-top: 20px;
+    }
+
+    /* Doctor Profile Modal Content */
+    .doctor-profile-header {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        margin-bottom: 20px;
+    }
+
+    .doctor-profile-avatar img {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        object-fit: cover;
+    }
+
+    .doctor-profile-name h2 {
+        margin: 0 0 5px 0;
+        color: #2c3e50;
+    }
+
+    .doctor-profile-name p {
+        margin: 0;
+        color: #3498db;
+        font-weight: 500;
+    }
+
+    .doctor-profile-details {
+        margin-top: 20px;
+    }
+
+    .doctor-profile-details h3 {
+        margin: 0 0 10px 0;
+        color: #2c3e50;
+        font-size: 18px;
+        border-bottom: 1px solid #e9ecef;
+        padding-bottom: 10px;
+    }
+
+    .doctor-profile-info {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 15px;
+    }
+
+    .doctor-profile-info-item {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .doctor-profile-info-item label {
+        font-weight: 500;
+        color: #6c757d;
+        margin-bottom: 5px;
+    }
+
+    .doctor-profile-info-item span {
+        color: #2c3e50;
+    }
+
+    .doctor-profile-bio {
+        margin-top: 20px;
+    }
+
+    .doctor-profile-bio h3 {
+        margin: 0 0 10px 0;
+        color: #2c3e50;
+        font-size: 18px;
+        border-bottom: 1px solid #e9ecef;
+        padding-bottom: 10px;
+    }
+
+    .doctor-profile-bio p {
+        color: #6c757d;
+        line-height: 1.6;
+    }
+
+    .doctor-profile-actions {
+        margin-top: 20px;
+        display: flex;
+        gap: 10px;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .search-filter-row {
+            flex-direction: column;
+        }
+
+        .doctors-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .doctor-profile-header {
+            flex-direction: column;
+            text-align: center;
+        }
+
+        .doctor-profile-info {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<script>
+    function viewDoctorProfile(doctorId) {
+        // In a real application, you would fetch the doctor's details from the server
+        // For now, we'll just show a mock profile
+        const profileContent = `
+            <div class="doctor-profile-header">
+                <div class="doctor-profile-avatar">
+                    <img src="https://via.placeholder.com/100" alt="Doctor">
+                </div>
+                <div class="doctor-profile-name">
+                    <h2>Dr. John Doe</h2>
+                    <p>Cardiologist</p>
+                </div>
+            </div>
+            <div class="doctor-profile-details">
+                <h3>Contact Information</h3>
+                <div class="doctor-profile-info">
+                    <div class="doctor-profile-info-item">
+                        <label>Email</label>
+                        <span>doctor@example.com</span>
+                    </div>
+                    <div class="doctor-profile-info-item">
+                        <label>Phone</label>
+                        <span>+91 9876543210</span>
+                    </div>
+                    <div class="doctor-profile-info-item">
+                        <label>Location</label>
+                        <span>Mumbai</span>
+                    </div>
+                    <div class="doctor-profile-info-item">
+                        <label>Experience</label>
+                        <span>15 years</span>
+                    </div>
+                </div>
+            </div>
+            <div class="doctor-profile-bio">
+                <h3>About</h3>
+                <p>Dr. John Doe is a highly experienced cardiologist with over 15 years of practice. He specializes in interventional cardiology and has performed numerous successful procedures. Dr. Doe is known for his patient-centered approach and dedication to providing the best cardiac care.</p>
+            </div>
+            <div class="doctor-profile-actions">
+                <button class="btn-primary" onclick="bookAppointment('${doctorId}')"><i class="fas fa-calendar-plus"></i> Book Appointment</button>
+            </div>
+        `;
+        
+        document.getElementById('doctor-profile-content').innerHTML = profileContent;
+        document.getElementById('doctor-profile-modal').style.display = 'block';
+    }
+
+    function closeDoctorProfileModal() {
+        document.getElementById('doctor-profile-modal').style.display = 'none';
+    }
+
+    function bookAppointment(doctorId) {
+        // Set the doctor ID in the form
+        document.getElementById('doctor_id').value = doctorId;
+        // Close the profile modal if it's open
+        document.getElementById('doctor-profile-modal').style.display = 'none';
+        // Open the appointment modal
+        document.getElementById('book-appointment-modal').style.display = 'block';
+    }
+
+    function closeBookAppointmentModal() {
+        document.getElementById('book-appointment-modal').style.display = 'none';
+    }
+
+    // Close modals when clicking outside of them
+    window.onclick = function(event) {
+        const doctorProfileModal = document.getElementById('doctor-profile-modal');
+        const bookAppointmentModal = document.getElementById('book-appointment-modal');
+        
+        if (event.target == doctorProfileModal) {
+            doctorProfileModal.style.display = 'none';
+        }
+        
+        if (event.target == bookAppointmentModal) {
+            bookAppointmentModal.style.display = 'none';
+        }
+    }
+</script>
+{% endblock %}

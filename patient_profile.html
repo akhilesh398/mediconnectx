@@ -1,0 +1,1167 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="dashboard-container">
+    <div class="sidebar">
+        <div class="logo">
+            <img src="https://cdn-icons-png.flaticon.com/512/942/942748.png" alt="logo">
+            <h1>MediConnectX</h1>
+        </div>
+
+        <a href="{% url 'user_dashboard' %}" class="menu-item" style="text-decoration: none; color: white;">
+            <i class="fas fa-home"></i>
+            <span>Dashboard</span>
+        </a>
+
+        <a href="{% url 'patient_appointments' %}" class="menu-item" style="text-decoration: none; color: white;">
+            <i class="fas fa-calendar-alt"></i>
+            <span>Appointments</span>
+        </a>
+
+        <a href="{% url 'patient_prescriptions' %}" class="menu-item" style="text-decoration: none; color: white;">
+            <i class="fas fa-file-medical"></i>
+            <span>Prescriptions</span>
+        </a>
+
+        <a href="{% url 'patient_medical_records' %}" class="menu-item" style="text-decoration: none; color: white;">
+            <i class="fas fa-notes-medical"></i>
+            <span>Medical Records</span>
+        </a>
+
+        <a href="{% url 'find_doctors' %}" class="menu-item" style="text-decoration: none; color: white;">
+            <i class="fas fa-user-md"></i>
+            <span>Find Doctors</span>
+        </a>
+
+        <a href="{% url 'patient_profile' %}" class="menu-item active" style="text-decoration: none; color: white;">
+            <i class="fas fa-user"></i>
+            <span>Profile</span>
+        </a>
+
+        <a href="/logout/patient/" class="logout-btn">
+            <i class="fas fa-sign-out-alt"></i>
+            <span>Logout</span>
+        </a>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Header -->
+        <div class="header">
+            <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" placeholder="Search...">
+            </div>
+            <div class="user-info">
+                <div class="notification">
+                    <i class="fas fa-bell"></i>
+                    <span class="badge">3</span>
+                </div>
+                <div class="user">
+                    <img src="https://via.placeholder.com/40" alt="User">
+                    <span>{{ patient.full_name }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Content -->
+        <div class="content">
+            <div class="page-title">
+                <h2>My Profile</h2>
+            </div>
+
+            <div class="profile-container">
+                <!-- Profile Sidebar -->
+                <div class="profile-sidebar">
+                    <div class="profile-image">
+                        <img src="https://via.placeholder.com/150" alt="{{ patient.full_name }}">
+                        <div class="profile-image-overlay">
+                            <i class="fas fa-camera"></i>
+                            <span>Change Photo</span>
+                        </div>
+                    </div>
+                    <h3>{{ patient.full_name }}</h3>
+                    <p class="profile-id">Patient ID: {{ patient.id }}</p>
+                    <div class="profile-stats">
+                        <div class="stat">
+                            <span class="stat-value">{{ appointments_count }}</span>
+                            <span class="stat-label">Appointments</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-value">{{ prescriptions_count }}</span>
+                            <span class="stat-label">Prescriptions</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-value">{{ medical_records_count }}</span>
+                            <span class="stat-label">Records</span>
+                        </div>
+                    </div>
+                    <div class="profile-actions">
+                        <button class="btn-primary" id="edit-profile-btn"><i class="fas fa-edit"></i> Edit Profile</button>
+                        <button class="btn-outline" id="change-password-btn"><i class="fas fa-lock"></i> Change Password</button>
+                    </div>
+                </div>
+
+                <!-- Profile Content -->
+                <div class="profile-content">
+                    <!-- Profile Tabs -->
+                    <div class="profile-tabs">
+                        <button class="tab-btn active" data-tab="personal-info">Personal Information</button>
+                        <button class="tab-btn" data-tab="medical-info">Medical Information</button>
+                        <button class="tab-btn" data-tab="account-settings">Account Settings</button>
+                    </div>
+
+                    <!-- Tab Content -->
+                    <div class="tab-content">
+                        <!-- Personal Information Tab -->
+                        <div class="tab-pane active" id="personal-info">
+                            <div class="info-section">
+                                <h3>Personal Details</h3>
+                                <div class="info-grid">
+                                    <div class="info-item">
+                                        <label>Full Name</label>
+                                        <p>{{ patient.full_name }}</p>
+                                    </div>
+                                    <div class="info-item">
+                                        <label>Email Address</label>
+                                        <p>{{ patient.email }}</p>
+                                    </div>
+                                    <div class="info-item">
+                                        <label>Phone Number</label>
+                                        <p>{{ patient.phone }}</p>
+                                    </div>
+                                    <div class="info-item">
+                                        <label>Date of Birth</label>
+                                        <p>{{ patient.dob }}</p>
+                                    </div>
+                                    <div class="info-item">
+                                        <label>Gender</label>
+                                        <p>{{ patient.gender }}</p>
+                                    </div>
+                                    <div class="info-item">
+                                        <label>Blood Group</label>
+                                        <p>{{ patient.blood_group }}</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="info-section">
+                                <h3>Contact Information</h3>
+                                <div class="info-grid">
+                                    <div class="info-item">
+                                        <label>Address</label>
+                                        <p>{{ patient.address }}</p>
+                                    </div>
+                                    <div class="info-item">
+                                        <label>City</label>
+                                        <p>{{ patient.city }}</p>
+                                    </div>
+                                    <div class="info-item">
+                                        <label>State</label>
+                                        <p>{{ patient.state }}</p>
+                                    </div>
+                                    <div class="info-item">
+                                        <label>Postal Code</label>
+                                        <p>{{ patient.postal_code }}</p>
+                                    </div>
+                                    <div class="info-item">
+                                        <label>Country</label>
+                                        <p>{{ patient.country }}</p>
+                                    </div>
+                                    <div class="info-item">
+                                        <label>Emergency Contact</label>
+                                        <p>{{ patient.emergency_contact }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Medical Information Tab -->
+                        <div class="tab-pane" id="medical-info">
+                            <div class="info-section">
+                                <h3>Medical History</h3>
+                                <div class="info-grid">
+                                    <div class="info-item">
+                                        <label>Allergies</label>
+                                        <p>{{ patient.allergies|default:"None" }}</p>
+                                    </div>
+                                    <div class="info-item">
+                                        <label>Chronic Diseases</label>
+                                        <p>{{ patient.chronic_diseases|default:"None" }}</p>
+                                    </div>
+                                    <div class="info-item">
+                                        <label>Past Surgeries</label>
+                                        <p>{{ patient.past_surgeries|default:"None" }}</p>
+                                    </div>
+                                    <div class="info-item">
+                                        <label>Family Medical History</label>
+                                        <p>{{ patient.family_medical_history|default:"None" }}</p>
+                                    </div>
+                                    <div class="info-item">
+                                        <label>Current Medications</label>
+                                        <p>{{ patient.current_medications|default:"None" }}</p>
+                                    </div>
+                                    <div class="info-item">
+                                        <label>Lifestyle</label>
+                                        <p>{{ patient.lifestyle|default:"Not specified" }}</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="info-section">
+                                <h3>Insurance Information</h3>
+                                <div class="info-grid">
+                                    <div class="info-item">
+                                        <label>Insurance Provider</label>
+                                        <p>{{ patient.insurance_provider|default:"Not provided" }}</p>
+                                    </div>
+                                    <div class="info-item">
+                                        <label>Insurance ID</label>
+                                        <p>{{ patient.insurance_id|default:"Not provided" }}</p>
+                                    </div>
+                                    <div class="info-item">
+                                        <label>Insurance Validity</label>
+                                        <p>{{ patient.insurance_validity|default:"Not provided" }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Account Settings Tab -->
+                        <div class="tab-pane" id="account-settings">
+                            <div class="info-section">
+                                <h3>Account Preferences</h3>
+                                <div class="settings-list">
+                                    <div class="settings-item">
+                                        <div class="settings-info">
+                                            <h4>Email Notifications</h4>
+                                            <p>Receive email notifications for appointments, prescriptions, and other updates</p>
+                                        </div>
+                                        <div class="settings-action">
+                                            <label class="switch">
+                                                <input type="checkbox" checked>
+                                                <span class="slider round"></span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="settings-item">
+                                        <div class="settings-info">
+                                            <h4>SMS Notifications</h4>
+                                            <p>Receive SMS alerts for appointment reminders</p>
+                                        </div>
+                                        <div class="settings-action">
+                                            <label class="switch">
+                                                <input type="checkbox" checked>
+                                                <span class="slider round"></span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="settings-item">
+                                        <div class="settings-info">
+                                            <h4>Two-Factor Authentication</h4>
+                                            <p>Add an extra layer of security to your account</p>
+                                        </div>
+                                        <div class="settings-action">
+                                            <label class="switch">
+                                                <input type="checkbox">
+                                                <span class="slider round"></span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="settings-item">
+                                        <div class="settings-info">
+                                            <h4>Profile Visibility</h4>
+                                            <p>Control who can see your profile information</p>
+                                        </div>
+                                        <div class="settings-action">
+                                            <select class="settings-select">
+                                                <option value="public">Public</option>
+                                                <option value="private" selected>Private</option>
+                                                <option value="doctors-only">Doctors Only</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="info-section">
+                                <h3>Danger Zone</h3>
+                                <div class="danger-zone">
+                                    <div class="danger-item">
+                                        <div class="danger-info">
+                                            <h4>Delete Account</h4>
+                                            <p>Permanently delete your account and all associated data</p>
+                                        </div>
+                                        <div class="danger-action">
+                                            <button class="btn-danger">Delete Account</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Profile Modal -->
+<div id="edit-profile-modal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeEditProfileModal()">&times;</span>
+        <h2>Edit Profile</h2>
+        <form id="edit-profile-form" method="post" action="{% url 'patient_profile' %}">
+            {% csrf_token %}
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="full_name">Full Name</label>
+                    <input type="text" id="full_name" name="full_name" value="{{ patient.full_name }}" required>
+                </div>
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" name="email" value="{{ patient.email }}" required>
+                </div>
+                <div class="form-group">
+                    <label for="phone">Phone Number</label>
+                    <input type="tel" id="phone" name="phone" value="{{ patient.phone }}" required>
+                </div>
+                <div class="form-group">
+                    <label for="dob">Date of Birth</label>
+                    <input type="date" id="dob" name="dob" value="{{ patient.dob|date:'Y-m-d' }}" required>
+                </div>
+                <div class="form-group">
+                    <label for="gender">Gender</label>
+                    <select id="gender" name="gender" required>
+                        <option value="Male" {% if patient.gender == 'Male' %}selected{% endif %}>Male</option>
+                        <option value="Female" {% if patient.gender == 'Female' %}selected{% endif %}>Female</option>
+                        <option value="Other" {% if patient.gender == 'Other' %}selected{% endif %}>Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="blood_group">Blood Group</label>
+                    <select id="blood_group" name="blood_group" required>
+                        <option value="A+" {% if patient.blood_group == 'A+' %}selected{% endif %}>A+</option>
+                        <option value="A-" {% if patient.blood_group == 'A-' %}selected{% endif %}>A-</option>
+                        <option value="B+" {% if patient.blood_group == 'B+' %}selected{% endif %}>B+</option>
+                        <option value="B-" {% if patient.blood_group == 'B-' %}selected{% endif %}>B-</option>
+                        <option value="AB+" {% if patient.blood_group == 'AB+' %}selected{% endif %}>AB+</option>
+                        <option value="AB-" {% if patient.blood_group == 'AB-' %}selected{% endif %}>AB-</option>
+                        <option value="O+" {% if patient.blood_group == 'O+' %}selected{% endif %}>O+</option>
+                        <option value="O-" {% if patient.blood_group == 'O-' %}selected{% endif %}>O-</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="address">Address</label>
+                    <input type="text" id="address" name="address" value="{{ patient.address }}" required>
+                </div>
+                <div class="form-group">
+                    <label for="city">City</label>
+                    <input type="text" id="city" name="city" value="{{ patient.city }}" required>
+                </div>
+                <div class="form-group">
+                    <label for="state">State</label>
+                    <input type="text" id="state" name="state" value="{{ patient.state }}" required>
+                </div>
+                <div class="form-group">
+                    <label for="postal_code">Postal Code</label>
+                    <input type="text" id="postal_code" name="postal_code" value="{{ patient.postal_code }}" required>
+                </div>
+                <div class="form-group">
+                    <label for="country">Country</label>
+                    <input type="text" id="country" name="country" value="{{ patient.country }}" required>
+                </div>
+                <div class="form-group">
+                    <label for="emergency_contact">Emergency Contact</label>
+                    <input type="text" id="emergency_contact" name="emergency_contact" value="{{ patient.emergency_contact }}" required>
+                </div>
+            </div>
+            <div class="form-actions">
+                <button type="button" class="btn-secondary" onclick="closeEditProfileModal()">Cancel</button>
+                <button type="submit" class="btn-primary">Save Changes</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Change Password Modal -->
+<div id="change-password-modal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeChangePasswordModal()">&times;</span>
+        <h2>Change Password</h2>
+        <form id="change-password-form" method="post" action="{% url 'patient_profile' %}">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="change_password">
+            <div class="form-group">
+                <label for="current_password">Current Password</label>
+                <input type="password" id="current_password" name="current_password" required>
+            </div>
+            <div class="form-group">
+                <label for="new_password">New Password</label>
+                <input type="password" id="new_password" name="new_password" required>
+                <div class="password-strength">
+                    <div class="strength-bar">
+                        <div class="strength-level" id="password-strength-level"></div>
+                    </div>
+                    <span id="password-strength-text">Password strength</span>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="confirm_password">Confirm New Password</label>
+                <input type="password" id="confirm_password" name="confirm_password" required>
+            </div>
+            <div class="form-actions">
+                <button type="button" class="btn-secondary" onclick="closeChangePasswordModal()">Cancel</button>
+                <button type="submit" class="btn-primary">Change Password</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    /* Dashboard Container */
+    .dashboard-container {
+        display: flex;
+        min-height: 100vh;
+        background-color: #f5f5f5;
+    }
+
+    /* Sidebar */
+    .sidebar {
+        width: 250px;
+        background-color: #2c3e50;
+        color: #fff;
+        padding: 20px 0;
+        position: fixed;
+        height: 100%;
+        overflow-y: auto;
+    }
+
+    .logo {
+        text-align: center;
+        padding-bottom: 20px;
+        border-bottom: 1px solid #3a546a;
+    }
+
+    .menu {
+        list-style: none;
+        padding: 0;
+        margin: 20px 0;
+    }
+
+    .menu li {
+        padding: 10px 20px;
+        transition: all 0.3s;
+    }
+
+    .menu li.active {
+        background-color: #3a546a;
+        border-left: 4px solid #3498db;
+    }
+
+    .menu li a {
+        color: #fff;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+    }
+
+    .menu li a i {
+        margin-right: 10px;
+        width: 20px;
+    }
+
+    /* Main Content */
+    .main-content {
+        flex: 1;
+        margin-left: 250px;
+        padding: 20px;
+    }
+
+    /* Header */
+    .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-bottom: 20px;
+        border-bottom: 1px solid #e0e0e0;
+        margin-bottom: 20px;
+    }
+
+    .search-box {
+        display: flex;
+        align-items: center;
+        background-color: #fff;
+        border-radius: 4px;
+        padding: 8px 15px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        width: 300px;
+    }
+
+    .search-box input {
+        border: none;
+        outline: none;
+        margin-left: 10px;
+        width: 100%;
+    }
+
+    .user-info {
+        display: flex;
+        align-items: center;
+    }
+
+    .notification {
+        position: relative;
+        margin-right: 20px;
+    }
+
+    .badge {
+        position: absolute;
+        top: -8px;
+        right: -8px;
+        background-color: #e74c3c;
+        color: #fff;
+        border-radius: 50%;
+        width: 18px;
+        height: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+    }
+
+    .user {
+        display: flex;
+        align-items: center;
+    }
+
+    .user img {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        margin-right: 10px;
+    }
+
+    /* Content */
+    .content {
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        padding: 20px;
+    }
+
+    .page-title {
+        margin-bottom: 20px;
+    }
+
+    .page-title h2 {
+        margin: 0;
+        color: #2c3e50;
+    }
+
+    /* Profile Container */
+    .profile-container {
+        display: flex;
+        gap: 20px;
+    }
+
+    /* Profile Sidebar */
+    .profile-sidebar {
+        width: 300px;
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        padding: 20px;
+        text-align: center;
+    }
+
+    .profile-image {
+        position: relative;
+        width: 150px;
+        height: 150px;
+        margin: 0 auto 20px;
+        border-radius: 50%;
+        overflow: hidden;
+    }
+
+    .profile-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .profile-image-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        color: #fff;
+        opacity: 0;
+        transition: opacity 0.3s;
+        cursor: pointer;
+    }
+
+    .profile-image:hover .profile-image-overlay {
+        opacity: 1;
+    }
+
+    .profile-image-overlay i {
+        font-size: 24px;
+        margin-bottom: 5px;
+    }
+
+    .profile-sidebar h3 {
+        margin: 0 0 5px 0;
+        color: #2c3e50;
+    }
+
+    .profile-id {
+        color: #7f8c8d;
+        margin: 0 0 20px 0;
+        font-size: 14px;
+    }
+
+    .profile-stats {
+        display: flex;
+        justify-content: space-around;
+        margin-bottom: 20px;
+        padding: 15px 0;
+        border-top: 1px solid #ecf0f1;
+        border-bottom: 1px solid #ecf0f1;
+    }
+
+    .stat {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .stat-value {
+        font-size: 20px;
+        font-weight: 600;
+        color: #3498db;
+    }
+
+    .stat-label {
+        font-size: 12px;
+        color: #7f8c8d;
+    }
+
+    .profile-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    /* Profile Content */
+    .profile-content {
+        flex: 1;
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+    }
+
+    /* Profile Tabs */
+    .profile-tabs {
+        display: flex;
+        background-color: #f8f9fa;
+        border-bottom: 1px solid #e9ecef;
+    }
+
+    .tab-btn {
+        padding: 15px 20px;
+        background: none;
+        border: none;
+        cursor: pointer;
+        font-weight: 500;
+        color: #6c757d;
+        position: relative;
+        transition: all 0.3s;
+    }
+
+    .tab-btn:hover {
+        color: #3498db;
+    }
+
+    .tab-btn.active {
+        color: #3498db;
+    }
+
+    .tab-btn.active::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 3px;
+        background-color: #3498db;
+    }
+
+    /* Tab Content */
+    .tab-content {
+        padding: 20px;
+    }
+
+    .tab-pane {
+        display: none;
+    }
+
+    .tab-pane.active {
+        display: block;
+    }
+
+    /* Info Section */
+    .info-section {
+        margin-bottom: 30px;
+    }
+
+    .info-section h3 {
+        margin: 0 0 15px 0;
+        color: #2c3e50;
+        font-size: 18px;
+        border-bottom: 1px solid #e9ecef;
+        padding-bottom: 10px;
+    }
+
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 20px;
+    }
+
+    .info-item {
+        margin-bottom: 15px;
+    }
+
+    .info-item label {
+        display: block;
+        font-weight: 500;
+        color: #6c757d;
+        margin-bottom: 5px;
+        font-size: 14px;
+    }
+
+    .info-item p {
+        margin: 0;
+        color: #2c3e50;
+    }
+
+    /* Settings List */
+    .settings-list {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .settings-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 15px;
+        background-color: #f8f9fa;
+        border-radius: 8px;
+    }
+
+    .settings-info {
+        flex: 1;
+    }
+
+    .settings-info h4 {
+        margin: 0 0 5px 0;
+        color: #2c3e50;
+    }
+
+    .settings-info p {
+        margin: 0;
+        color: #6c757d;
+        font-size: 14px;
+    }
+
+    .settings-action {
+        margin-left: 20px;
+    }
+
+    /* Switch Toggle */
+    .switch {
+        position: relative;
+        display: inline-block;
+        width: 50px;
+        height: 24px;
+    }
+
+    .switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+
+    .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #ccc;
+        transition: .4s;
+    }
+
+    .slider:before {
+        position: absolute;
+        content: "";
+        height: 16px;
+        width: 16px;
+        left: 4px;
+        bottom: 4px;
+        background-color: white;
+        transition: .4s;
+    }
+
+    input:checked + .slider {
+        background-color: #3498db;
+    }
+
+    input:focus + .slider {
+        box-shadow: 0 0 1px #3498db;
+    }
+
+    input:checked + .slider:before {
+        transform: translateX(26px);
+    }
+
+    .slider.round {
+        border-radius: 24px;
+    }
+
+    .slider.round:before {
+        border-radius: 50%;
+    }
+
+    /* Settings Select */
+    .settings-select {
+        padding: 8px 12px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        background-color: #fff;
+        min-width: 120px;
+    }
+
+    /* Danger Zone */
+    .danger-zone {
+        background-color: #fff5f5;
+        border: 1px solid #fed7d7;
+        border-radius: 8px;
+        padding: 15px;
+    }
+
+    .danger-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .danger-info h4 {
+        margin: 0 0 5px 0;
+        color: #e53e3e;
+    }
+
+    .danger-info p {
+        margin: 0;
+        color: #6c757d;
+        font-size: 14px;
+    }
+
+    .btn-danger {
+        background-color: #e53e3e;
+        color: #fff;
+        border: none;
+        padding: 8px 15px;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+
+    .btn-danger:hover {
+        background-color: #c53030;
+    }
+
+    /* Buttons */
+    .btn-primary {
+        background-color: #3498db;
+        color: #fff;
+        border: none;
+        padding: 10px 15px;
+        border-radius: 4px;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 5px;
+        width: 100%;
+    }
+
+    .btn-primary:hover {
+        background-color: #2980b9;
+    }
+
+    .btn-secondary {
+        background-color: #95a5a6;
+        color: #fff;
+        border: none;
+        padding: 10px 15px;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+
+    .btn-secondary:hover {
+        background-color: #7f8c8d;
+    }
+
+    .btn-outline {
+        background-color: transparent;
+        color: #555;
+        border: 1px solid #ddd;
+        padding: 10px 15px;
+        border-radius: 4px;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 5px;
+        width: 100%;
+    }
+
+    .btn-outline:hover {
+        background-color: #f5f5f5;
+    }
+
+    /* Modal */
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+    }
+
+    .modal-content {
+        background-color: #fff;
+        margin: 5% auto;
+        padding: 20px;
+        border-radius: 8px;
+        width: 600px;
+        max-width: 90%;
+        max-height: 80vh;
+        overflow-y: auto;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        position: relative;
+    }
+
+    .close {
+        position: absolute;
+        right: 20px;
+        top: 15px;
+        font-size: 24px;
+        cursor: pointer;
+    }
+
+    /* Form Grid */
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 15px;
+    }
+
+    .form-group {
+        margin-bottom: 15px;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: 500;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+    }
+
+    .form-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        margin-top: 20px;
+    }
+
+    /* Password Strength */
+    .password-strength {
+        margin-top: 10px;
+    }
+
+    .strength-bar {
+        height: 5px;
+        background-color: #e9ecef;
+        border-radius: 5px;
+        margin-bottom: 5px;
+    }
+
+    .strength-level {
+        height: 100%;
+        width: 0;
+        border-radius: 5px;
+        transition: width 0.3s, background-color 0.3s;
+    }
+
+    /* Responsive */
+    @media (max-width: 992px) {
+        .profile-container {
+            flex-direction: column;
+        }
+
+        .profile-sidebar {
+            width: 100%;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .form-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .info-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<script>
+    // Tab Switching
+    document.addEventListener('DOMContentLoaded', function() {
+        const tabBtns = document.querySelectorAll('.tab-btn');
+        const tabPanes = document.querySelectorAll('.tab-pane');
+
+        tabBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                // Remove active class from all buttons and panes
+                tabBtns.forEach(b => b.classList.remove('active'));
+                tabPanes.forEach(p => p.classList.remove('active'));
+
+                // Add active class to clicked button and corresponding pane
+                this.classList.add('active');
+                const tabId = this.getAttribute('data-tab');
+                document.getElementById(tabId).classList.add('active');
+            });
+        });
+
+        // Edit Profile Modal
+        const editProfileBtn = document.getElementById('edit-profile-btn');
+        const editProfileModal = document.getElementById('edit-profile-modal');
+
+        editProfileBtn.addEventListener('click', function() {
+            editProfileModal.style.display = 'block';
+        });
+
+        // Change Password Modal
+        const changePasswordBtn = document.getElementById('change-password-btn');
+        const changePasswordModal = document.getElementById('change-password-modal');
+
+        changePasswordBtn.addEventListener('click', function() {
+            changePasswordModal.style.display = 'block';
+        });
+
+        // Password Strength Meter
+        const newPasswordInput = document.getElementById('new_password');
+        const strengthLevel = document.getElementById('password-strength-level');
+        const strengthText = document.getElementById('password-strength-text');
+
+        newPasswordInput.addEventListener('input', function() {
+            const password = this.value;
+            let strength = 0;
+            let strengthMessage = '';
+
+            if (password.length >= 8) strength += 1;
+            if (password.match(/[a-z]/) && password.match(/[A-Z]/)) strength += 1;
+            if (password.match(/\d/)) strength += 1;
+            if (password.match(/[^a-zA-Z\d]/)) strength += 1;
+
+            switch (strength) {
+                case 0:
+                    strengthLevel.style.width = '0%';
+                    strengthLevel.style.backgroundColor = '#e74c3c';
+                    strengthMessage = 'Very Weak';
+                    break;
+                case 1:
+                    strengthLevel.style.width = '25%';
+                    strengthLevel.style.backgroundColor = '#e74c3c';
+                    strengthMessage = 'Weak';
+                    break;
+                case 2:
+                    strengthLevel.style.width = '50%';
+                    strengthLevel.style.backgroundColor = '#f39c12';
+                    strengthMessage = 'Fair';
+                    break;
+                case 3:
+                    strengthLevel.style.width = '75%';
+                    strengthLevel.style.backgroundColor = '#3498db';
+                    strengthMessage = 'Good';
+                    break;
+                case 4:
+                    strengthLevel.style.width = '100%';
+                    strengthLevel.style.backgroundColor = '#2ecc71';
+                    strengthMessage = 'Strong';
+                    break;
+            }
+
+            strengthText.textContent = strengthMessage;
+        });
+
+        // Confirm Password Validation
+        const confirmPasswordInput = document.getElementById('confirm_password');
+        const changePasswordForm = document.getElementById('change-password-form');
+
+        changePasswordForm.addEventListener('submit', function(e) {
+            if (newPasswordInput.value !== confirmPasswordInput.value) {
+                e.preventDefault();
+                alert('Passwords do not match!');
+            }
+        });
+    });
+
+    // Close Modals
+    function closeEditProfileModal() {
+        document.getElementById('edit-profile-modal').style.display = 'none';
+    }
+
+    function closeChangePasswordModal() {
+        document.getElementById('change-password-modal').style.display = 'none';
+    }
+
+    // Close modals when clicking outside of them
+    window.onclick = function(event) {
+        const editProfileModal = document.getElementById('edit-profile-modal');
+        const changePasswordModal = document.getElementById('change-password-modal');
+        
+        if (event.target == editProfileModal) {
+            editProfileModal.style.display = 'none';
+        }
+        
+        if (event.target == changePasswordModal) {
+            changePasswordModal.style.display = 'none';
+        }
+    }
+</script>
+{% endblock %}

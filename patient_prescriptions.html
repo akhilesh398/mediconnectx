@@ -1,0 +1,493 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="dashboard-container">
+    <div class="sidebar">
+        <div class="logo">
+            <img src="https://cdn-icons-png.flaticon.com/512/942/942748.png" alt="logo">
+            <h1>MediConnectX</h1>
+        </div>
+
+        <a href="{% url 'user_dashboard' %}" class="menu-item">
+            <i class="fas fa-home"></i>
+            <span>Dashboard</span>
+        </a>
+
+        <a href="{% url 'patient_appointments' %}" class="menu-item">
+            <i class="fas fa-calendar-alt"></i>
+            <span>Appointments</span>
+        </a>
+
+        <a href="{% url 'patient_prescriptions' %}" class="menu-item active">
+            <i class="fas fa-file-medical"></i>
+            <span>Prescriptions</span>
+        </a>
+
+        <a href="{% url 'patient_medical_records' %}" class="menu-item">
+            <i class="fas fa-notes-medical"></i>
+            <span>Medical Records</span>
+        </a>
+
+        <a href="{% url 'find_doctors' %}" class="menu-item">
+            <i class="fas fa-user-md"></i>
+            <span>Find Doctors</span>
+        </a>
+
+        <a href="{% url 'patient_profile' %}" class="menu-item">
+            <i class="fas fa-user"></i>
+            <span>Profile</span>
+        </a>
+
+        <a href="/logout/patient/" class="logout-btn">
+            <i class="fas fa-sign-out-alt"></i>
+            <span>Logout</span>
+        </a>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Header -->
+        <div class="header">
+            <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" placeholder="Search prescriptions...">
+            </div>
+            <div class="user-info">
+                <div class="notification">
+                    <i class="fas fa-bell"></i>
+                    <span class="badge">3</span>
+                </div>
+                <div class="user">
+                    <img src="https://via.placeholder.com/40" alt="User">
+                    <span>{{ patient.full_name }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Content -->
+        <div class="content">
+            <div class="page-title">
+                <h2>My Prescriptions</h2>
+            </div>
+
+            <!-- Prescription Filters -->
+            <div class="filters">
+                <input type="text" id="doctor-filter" placeholder="Filter by doctor">
+                <input type="text" id="diagnosis-filter" placeholder="Filter by diagnosis">
+                <input type="date" id="date-filter" placeholder="Filter by date">
+                <button class="btn-secondary" onclick="applyFilters()">Apply Filters</button>
+                <button class="btn-outline" onclick="resetFilters()">Reset</button>
+            </div>
+
+            <!-- Prescriptions List -->
+            <div class="prescriptions-container">
+                {% if prescriptions %}
+                    {% for prescription in prescriptions %}
+                        <div class="prescription-card">
+                            <div class="prescription-header">
+                                <div class="prescription-info">
+                                    <h3>{{ prescription.diagnosis }}</h3>
+                                    <p class="date">{{ prescription.created_at|date:"F d, Y" }}</p>
+                                </div>
+                                <div class="doctor-info">
+                                    <p><i class="fas fa-user-md"></i> Dr. {{ prescription.doctor.full_name }}</p>
+                                    <p><i class="fas fa-stethoscope"></i> {{ prescription.doctor.specialization }}</p>
+                                </div>
+                            </div>
+                            <div class="prescription-body">
+                                <div class="section">
+                                    <h4><i class="fas fa-pills"></i> Medications</h4>
+                                    <div class="medications">
+                                        {{ prescription.medications|linebreaks }}
+                                    </div>
+                                </div>
+                                <div class="section">
+                                    <h4><i class="fas fa-clipboard-list"></i> Instructions</h4>
+                                    <p>{{ prescription.instructions|linebreaks }}</p>
+                                </div>
+                                {% if prescription.follow_up_date %}
+                                    <div class="follow-up">
+                                        <p><i class="fas fa-calendar-alt"></i> Follow-up appointment: {{ prescription.follow_up_date|date:"F d, Y" }}</p>
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="prescription-footer">
+                                <button class="btn-outline" onclick="printPrescription({{ prescription.id }})"><i class="fas fa-print"></i> Print</button>
+                                <button class="btn-outline" onclick="downloadPrescription({{ prescription.id }})"><i class="fas fa-download"></i> Download PDF</button>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="no-data">
+                        <i class="fas fa-prescription large-icon"></i>
+                        <h3>No Prescriptions Found</h3>
+                        <p>You don't have any prescriptions yet.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Dashboard Container */
+    .dashboard-container {
+        display: flex;
+        min-height: 100vh;
+        background-color: #f5f5f5;
+    }
+
+    /* Sidebar */
+    .sidebar {
+        width: 250px;
+        background-color: #2c3e50;
+        color: #fff;
+        padding: 20px 0;
+        position: fixed;
+        height: 100%;
+        overflow-y: auto;
+    }
+
+    .logo {
+        text-align: center;
+        padding-bottom: 20px;
+        border-bottom: 1px solid #3a546a;
+    }
+
+    .menu {
+        list-style: none;
+        padding: 0;
+        margin: 20px 0;
+    }
+
+    .menu li {
+        padding: 10px 20px;
+        transition: all 0.3s;
+    }
+
+    .menu li.active {
+        background-color: #3a546a;
+        border-left: 4px solid #3498db;
+    }
+
+    .menu li a {
+        color: #fff;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+    }
+
+    .menu li a i {
+        margin-right: 10px;
+        width: 20px;
+    }
+
+    /* Main Content */
+    .main-content {
+        flex: 1;
+        margin-left: 250px;
+        padding: 20px;
+    }
+
+    /* Header */
+    .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-bottom: 20px;
+        border-bottom: 1px solid #e0e0e0;
+        margin-bottom: 20px;
+    }
+
+    .search-box {
+        display: flex;
+        align-items: center;
+        background-color: #fff;
+        border-radius: 4px;
+        padding: 8px 15px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        width: 300px;
+    }
+
+    .search-box input {
+        border: none;
+        outline: none;
+        margin-left: 10px;
+        width: 100%;
+    }
+
+    .user-info {
+        display: flex;
+        align-items: center;
+    }
+
+    .notification {
+        position: relative;
+        margin-right: 20px;
+    }
+
+    .badge {
+        position: absolute;
+        top: -8px;
+        right: -8px;
+        background-color: #e74c3c;
+        color: #fff;
+        border-radius: 50%;
+        width: 18px;
+        height: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+    }
+
+    .user {
+        display: flex;
+        align-items: center;
+    }
+
+    .user img {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        margin-right: 10px;
+    }
+
+    /* Content */
+    .content {
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        padding: 20px;
+    }
+
+    .page-title {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+
+    .page-title h2 {
+        margin: 0;
+        color: #2c3e50;
+    }
+
+    /* Filters */
+    .filters {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+    }
+
+    .filters input {
+        padding: 8px 12px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        flex: 1;
+        min-width: 150px;
+    }
+
+    /* Prescription Cards */
+    .prescriptions-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+        gap: 20px;
+    }
+
+    .prescription-card {
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        transition: transform 0.3s, box-shadow 0.3s;
+    }
+
+    .prescription-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .prescription-header {
+        padding: 15px;
+        background-color: #f8f9fa;
+        border-bottom: 1px solid #e9ecef;
+        display: flex;
+        justify-content: space-between;
+    }
+
+    .prescription-info h3 {
+        margin: 0 0 5px 0;
+        color: #2c3e50;
+        font-size: 18px;
+    }
+
+    .prescription-info .date {
+        color: #6c757d;
+        font-size: 14px;
+        margin: 0;
+    }
+
+    .doctor-info p {
+        margin: 5px 0;
+        color: #495057;
+        font-size: 14px;
+    }
+
+    .prescription-body {
+        padding: 15px;
+    }
+
+    .section {
+        margin-bottom: 15px;
+    }
+
+    .section h4 {
+        color: #343a40;
+        margin: 0 0 10px 0;
+        font-size: 16px;
+        display: flex;
+        align-items: center;
+    }
+
+    .section h4 i {
+        margin-right: 8px;
+        color: #3498db;
+    }
+
+    .medications {
+        background-color: #f8f9fa;
+        padding: 10px;
+        border-radius: 4px;
+        border-left: 3px solid #3498db;
+    }
+
+    .follow-up {
+        margin-top: 15px;
+        padding: 10px;
+        background-color: #e3f2fd;
+        border-radius: 4px;
+        color: #0d47a1;
+    }
+
+    .follow-up p {
+        margin: 0;
+        display: flex;
+        align-items: center;
+    }
+
+    .follow-up i {
+        margin-right: 8px;
+    }
+
+    .prescription-footer {
+        padding: 15px;
+        border-top: 1px solid #e9ecef;
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+    }
+
+    /* No Data */
+    .no-data {
+        text-align: center;
+        padding: 40px 20px;
+        color: #6c757d;
+    }
+
+    .large-icon {
+        font-size: 48px;
+        margin-bottom: 15px;
+        color: #adb5bd;
+    }
+
+    /* Buttons */
+    .btn-primary {
+        background-color: #3498db;
+        color: #fff;
+        border: none;
+        padding: 10px 15px;
+        border-radius: 4px;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .btn-primary:hover {
+        background-color: #2980b9;
+    }
+
+    .btn-secondary {
+        background-color: #95a5a6;
+        color: #fff;
+        border: none;
+        padding: 8px 12px;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+
+    .btn-secondary:hover {
+        background-color: #7f8c8d;
+    }
+
+    .btn-outline {
+        background-color: transparent;
+        color: #555;
+        border: 1px solid #ddd;
+        padding: 8px 12px;
+        border-radius: 4px;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .btn-outline:hover {
+        background-color: #f5f5f5;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .prescriptions-container {
+            grid-template-columns: 1fr;
+        }
+
+        .prescription-header {
+            flex-direction: column;
+        }
+
+        .doctor-info {
+            margin-top: 10px;
+        }
+    }
+</style>
+
+<script>
+    function applyFilters() {
+        // Filter logic would go here
+        console.log('Applying filters');
+    }
+
+    function resetFilters() {
+        document.getElementById('doctor-filter').value = '';
+        document.getElementById('diagnosis-filter').value = '';
+        document.getElementById('date-filter').value = '';
+        // Reset the prescriptions list
+        console.log('Resetting filters');
+    }
+
+    function printPrescription(id) {
+        console.log('Printing prescription', id);
+        // Logic to print prescription
+        window.print();
+    }
+
+    function downloadPrescription(id) {
+        console.log('Downloading prescription', id);
+        // Logic to download prescription as PDF
+        alert('Prescription download started');
+    }
+</script>
+{% endblock %}

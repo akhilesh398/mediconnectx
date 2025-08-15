@@ -1,0 +1,1500 @@
+{% extends 'base.html' %}
+
+{% block extra_css %}
+<style>
+    body {
+        background-color: #ffffff;
+        min-height: 100vh;
+    }
+
+    .dashboard-container {
+        display: flex;
+        min-height: 100vh;
+    }
+
+    .sidebar { 
+        width: 250px; 
+        background-color: #2c3e50; 
+        color: #fff; 
+        padding: 20px 0; 
+        position: fixed; 
+        height: 100%; 
+        overflow-y: auto; 
+    } 
+
+
+    .logo { 
+        text-align: center; 
+        padding-bottom: 20px; 
+        border-bottom: 1px solid #3a546a; 
+    } 
+
+
+    .menu-item { 
+        display: block;
+        padding: 10px 20px; 
+        margin: 5px 0;
+        transition: all 0.3s; 
+        color: #fff;
+        text-decoration: none;
+    } 
+
+
+    .menu-item.active { 
+        background-color: #3a546a; 
+        border-left: 4px solid #3498db; 
+    } 
+
+
+    .menu-item i { 
+        margin-right: 10px; 
+        width: 20px; 
+    }
+
+    .main-content {
+        flex: 1;
+        padding: 20px;
+    }
+    
+    .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .user-info {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .user-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background-color: #3b82f6;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: bold;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <div class="sidebar">
+        <div class="logo">
+            <img src="https://cdn-icons-png.flaticon.com/512/942/942748.png" alt="logo">
+            <h1>MediConnectX</h1>
+        </div>
+
+        <div style="margin: 20px 0;">
+            <a href="{% url 'doctor_dashboard' %}" class="menu-item">
+                <i class="fas fa-home"></i>
+                <span>Dashboard</span>
+            </a>
+
+            <a href="{% url 'doctor_appointments' %}" class="menu-item">
+                <i class="fas fa-calendar-alt"></i>
+                <span>Appointments</span>
+            </a>
+
+            <a href="{% url 'doctor_patients' %}" class="menu-item">
+                <i class="fas fa-user-injured"></i>
+                <span>Patients</span>
+            </a>
+
+            <a href="{% url 'doctor_prescriptions' %}" class="menu-item active">
+                <i class="fas fa-file-medical"></i>
+                <span>Prescriptions</span>
+            </a>
+
+            <a href="{% url 'doctor_profile' %}" class="menu-item">
+                <i class="fas fa-user"></i>
+                <span>Profile</span>
+            </a>
+        </div>
+
+        <a href="/logout/doctor/" class="logout-btn">
+            <i class="fas fa-sign-out-alt"></i>
+            <span>Logout</span>
+        </a>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Header -->
+        <div class="header">
+            <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" placeholder="Search prescriptions...">
+            </div>
+            <div class="user-info">
+                <div class="notification">
+                    <i class="fas fa-bell"></i>
+                    <span class="badge">3</span>
+                </div>
+                <div class="user">
+                    <img src="https://via.placeholder.com/40" alt="User">
+                    <span>Dr. {{ doctor.full_name }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Content -->
+        <div class="content">
+            <div class="page-title">
+                <h2>Prescriptions</h2>
+                <p>Manage patient prescriptions</p>
+            </div>
+
+            <!-- Prescription Filters -->
+            <div class="filters-container">
+                <div class="filters">
+                    <div class="filter-group">
+                        <label for="patient-filter">Patient</label>
+                        <input type="text" id="patient-filter" class="filter-input" placeholder="Search by patient name">
+                    </div>
+                    <div class="filter-group">
+                        <label for="date-filter">Date Range</label>
+                        <div class="date-range">
+                            <input type="date" id="date-from" class="filter-input date-input">
+                            <span>to</span>
+                            <input type="date" id="date-to" class="filter-input date-input">
+                        </div>
+                    </div>
+                </div>
+                <div class="filter-actions">
+                    <button class="btn-outline"><i class="fas fa-filter"></i> Filter</button>
+                    <button class="btn-outline"><i class="fas fa-sync"></i> Reset</button>
+                </div>
+            </div>
+
+            <!-- Prescription Stats -->
+            <div class="stats-container">
+                <div class="stat-card">
+                    <div class="stat-icon" style="background-color: #3498db;">
+                        <i class="fas fa-prescription"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>{{ total_prescriptions }}</h3>
+                        <p>Total Prescriptions</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon" style="background-color: #2ecc71;">
+                        <i class="fas fa-calendar-day"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>{{ today_prescriptions }}</h3>
+                        <p>Today's Prescriptions</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon" style="background-color: #f39c12;">
+                        <i class="fas fa-user-injured"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>{{ unique_patients }}</h3>
+                        <p>Unique Patients</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon" style="background-color: #9b59b6;">
+                        <i class="fas fa-pills"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>{{ medications_prescribed }}</h3>
+                        <p>Medications Prescribed</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Prescriptions List -->
+            <div class="prescriptions-container">
+                {% for prescription in prescriptions %}
+                <div class="prescription-card" onclick="viewPrescription({{ prescription.id }})">
+                    <div class="prescription-header">
+                        <div class="patient-info">
+                            <img src="https://via.placeholder.com/40" alt="{{ prescription.patient.full_name }}">
+                            <div>
+                                <h4>{{ prescription.patient.full_name }}</h4>
+                                <p>ID: {{ prescription.patient.id }}</p>
+                            </div>
+                        </div>
+                        <div class="prescription-date">
+                            <i class="fas fa-calendar-alt"></i>
+                            <span>{{ prescription.created_at|date:"d M, Y" }}</span>
+                        </div>
+                    </div>
+                    <div class="prescription-body">
+                        <div class="diagnosis">
+                            <h5>Diagnosis</h5>
+                            <p>{{ prescription.diagnosis }}</p>
+                        </div>
+                        <div class="medications">
+                            <h5>Medications ({{ prescription.medications|length }})</h5>
+                            <ul class="medication-list">
+                                {% for medication in prescription.medications|slice:":3" %}
+                                <li>{{ medication.name }} - {{ medication.dosage }}</li>
+                                {% endfor %}
+                                {% if prescription.medications|length > 3 %}
+                                <li class="more-medications">+ {{ prescription.medications|length|add:"-3" }} more</li>
+                                {% endif %}
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="prescription-footer">
+                        <div class="follow-up">
+                            {% if prescription.follow_up_date %}
+                            <i class="fas fa-calendar-check"></i>
+                            <span>Follow-up: {{ prescription.follow_up_date|date:"d M, Y" }}</span>
+                            {% else %}
+                            <i class="fas fa-calendar-times"></i>
+                            <span>No follow-up scheduled</span>
+                            {% endif %}
+                        </div>
+                        <div class="prescription-actions">
+                            <button class="btn-icon" onclick="event.stopPropagation(); printPrescription({{ prescription.id }})" title="Print">
+                                <i class="fas fa-print"></i>
+                            </button>
+                            <button class="btn-icon" onclick="event.stopPropagation(); editPrescription({{ prescription.id }})" title="Edit">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="empty-state">
+                    <div class="empty-icon">
+                        <i class="fas fa-prescription"></i>
+                    </div>
+                    <h3>No Prescriptions Found</h3>
+                    <p>You haven't created any prescriptions yet.</p>
+                    <button class="btn-primary" onclick="createNewPrescription()"><i class="fas fa-plus"></i> Create New Prescription</button>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Pagination -->
+            {% if prescriptions %}
+            <div class="pagination">
+                <button class="pagination-btn" {% if not prescriptions.has_previous %}disabled{% endif %}>
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <span class="pagination-info">Page {{ prescriptions.number }} of {{ prescriptions.paginator.num_pages }}</span>
+                <button class="pagination-btn" {% if not prescriptions.has_next %}disabled{% endif %}>
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- View Prescription Modal -->
+<div id="view-prescription-modal" class="modal">
+    <div class="modal-content prescription-modal">
+        <span class="close" onclick="closeViewModal()">&times;</span>
+        <div class="prescription-view">
+            <div class="prescription-header-section">
+                <div class="doctor-info">
+                    <h2>Dr. {{ doctor.full_name }}</h2>
+                    <p>{{ doctor.specialization }}</p>
+                    <p>{{ doctor.license_number }}</p>
+                </div>
+                <div class="hospital-info">
+                    <h3>{{ doctor.hospital.name }}</h3>
+                    <p>{{ doctor.hospital.address }}</p>
+                    <p>{{ doctor.hospital.phone }}</p>
+                </div>
+            </div>
+
+            <div class="prescription-title">
+                <h1>Prescription</h1>
+                <div class="prescription-id">
+                    <span id="prescription-id"></span>
+                    <span id="prescription-date"></span>
+                </div>
+            </div>
+
+            <div class="patient-section">
+                <div class="section-title">Patient Information</div>
+                <div class="patient-details">
+                    <div class="detail-group">
+                        <label>Name:</label>
+                        <span id="patient-name"></span>
+                    </div>
+                    <div class="detail-group">
+                        <label>Age:</label>
+                        <span id="patient-age"></span>
+                    </div>
+                    <div class="detail-group">
+                        <label>Gender:</label>
+                        <span id="patient-gender"></span>
+                    </div>
+                    <div class="detail-group">
+                        <label>Blood Group:</label>
+                        <span id="patient-blood"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="diagnosis-section">
+                <div class="section-title">Diagnosis</div>
+                <p id="diagnosis-text"></p>
+            </div>
+
+            <div class="medications-section">
+                <div class="section-title">Medications</div>
+                <table class="medications-table">
+                    <thead>
+                        <tr>
+                            <th>Medication</th>
+                            <th>Dosage</th>
+                            <th>Frequency</th>
+                            <th>Duration</th>
+                            <th>Instructions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="medications-list">
+                        <!-- Medications will be added here dynamically -->
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="instructions-section">
+                <div class="section-title">General Instructions</div>
+                <p id="instructions-text"></p>
+            </div>
+
+            <div class="follow-up-section">
+                <div class="section-title">Follow-up</div>
+                <div class="follow-up-details">
+                    <div class="detail-group">
+                        <label>Date:</label>
+                        <span id="follow-up-date"></span>
+                    </div>
+                    <div class="detail-group">
+                        <label>Notes:</label>
+                        <span id="follow-up-notes"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="signature-section">
+                <div class="signature-line"></div>
+                <p>Doctor's Signature</p>
+            </div>
+        </div>
+
+        <div class="modal-actions">
+            <button class="btn-outline" onclick="printPrescriptionFromModal()"><i class="fas fa-print"></i> Print</button>
+            <button class="btn-outline" onclick="downloadPDF()"><i class="fas fa-download"></i> Download PDF</button>
+            <button class="btn-primary" onclick="editPrescriptionFromModal()"><i class="fas fa-edit"></i> Edit</button>
+        </div>
+    </div>
+</div>
+
+<!-- Create/Edit Prescription Modal -->
+<div id="edit-prescription-modal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeEditModal()">&times;</span>
+        <h2 id="edit-modal-title">Create New Prescription</h2>
+        <form id="prescription-form" method="post" action="{% url 'doctor_prescriptions' %}">
+            {% csrf_token %}
+            <input type="hidden" id="edit-prescription-id" name="prescription_id">
+            
+            <div class="form-section">
+                <h3>Patient Information</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="patient-select">Select Patient</label>
+                        <select id="patient-select" name="patient_id" class="form-input" required>
+                            <option value="">-- Select Patient --</option>
+                            {% for patient in patients %}
+                            <option value="{{ patient.id }}">{{ patient.full_name }} (ID: {{ patient.id }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="appointment-select">Related Appointment (Optional)</label>
+                        <select id="appointment-select" name="appointment_id" class="form-input">
+                            <option value="">-- Select Appointment --</option>
+                            <!-- Appointments will be loaded dynamically based on selected patient -->
+                        </select>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-section">
+                <h3>Diagnosis</h3>
+                <div class="form-group">
+                    <textarea id="diagnosis-input" name="diagnosis" class="form-input" rows="3" placeholder="Enter diagnosis details" required></textarea>
+                </div>
+            </div>
+            
+            <div class="form-section">
+                <h3>Medications</h3>
+                <div id="medications-container">
+                    <div class="medication-item">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Medication</label>
+                                <input type="text" name="medication_name[]" class="form-input" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Dosage</label>
+                                <input type="text" name="medication_dosage[]" class="form-input" required>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Frequency</label>
+                                <input type="text" name="medication_frequency[]" class="form-input" placeholder="e.g., Twice daily" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Duration</label>
+                                <input type="text" name="medication_duration[]" class="form-input" placeholder="e.g., 7 days" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Instructions</label>
+                            <input type="text" name="medication_instructions[]" class="form-input" placeholder="e.g., Take after meals">
+                        </div>
+                    </div>
+                </div>
+                <button type="button" class="btn-outline btn-add-medication"><i class="fas fa-plus"></i> Add Medication</button>
+            </div>
+            
+            <div class="form-section">
+                <h3>General Instructions</h3>
+                <div class="form-group">
+                    <textarea id="instructions-input" name="instructions" class="form-input" rows="3" placeholder="Enter general instructions for the patient"></textarea>
+                </div>
+            </div>
+            
+            <div class="form-section">
+                <h3>Follow-up</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="follow-up-date-input">Follow-up Date</label>
+                        <input type="date" id="follow-up-date-input" name="follow_up_date" class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label for="follow-up-notes-input">Follow-up Notes</label>
+                        <input type="text" id="follow-up-notes-input" name="follow_up_notes" class="form-input" placeholder="e.g., Bring test results">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-actions">
+                <button type="button" class="btn-secondary" onclick="closeEditModal()">Cancel</button>
+                <button type="submit" class="btn-primary">Save Prescription</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    /* Dashboard Container */
+    .dashboard-container {
+        display: flex;
+        min-height: 100vh;
+        background-color: #f5f5f5;
+    }
+
+    /* Sidebar */
+    .sidebar {
+        width: 250px;
+        background-color: #2c3e50;
+        color: #fff;
+        padding: 20px 0;
+        position: fixed;
+        height: 100%;
+        overflow-y: auto;
+    }
+
+    .logo {
+        text-align: center;
+        padding-bottom: 20px;
+        border-bottom: 1px solid #3a546a;
+    }
+
+    .menu {
+        list-style: none;
+        padding: 0;
+        margin: 20px 0;
+    }
+
+    .menu li {
+        padding: 10px 20px;
+        transition: all 0.3s;
+    }
+
+    .menu li.active {
+        background-color: #3a546a;
+        border-left: 4px solid #3498db;
+    }
+
+    .menu li a {
+        color: #fff;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+    }
+
+    .menu li a i {
+        margin-right: 10px;
+        width: 20px;
+    }
+
+    /* Main Content */
+    .main-content {
+        flex: 1;
+        margin-left: 250px;
+        padding: 20px;
+    }
+
+    /* Header */
+    .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-bottom: 20px;
+        border-bottom: 1px solid #e0e0e0;
+        margin-bottom: 20px;
+    }
+
+    .search-box {
+        display: flex;
+        align-items: center;
+        background-color: #fff;
+        border-radius: 4px;
+        padding: 8px 15px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        width: 300px;
+    }
+
+    .search-box input {
+        border: none;
+        outline: none;
+        margin-left: 10px;
+        width: 100%;
+    }
+
+    .user-info {
+        display: flex;
+        align-items: center;
+    }
+
+    .notification {
+        position: relative;
+        margin-right: 20px;
+    }
+
+    .badge {
+        position: absolute;
+        top: -8px;
+        right: -8px;
+        background-color: #e74c3c;
+        color: #fff;
+        border-radius: 50%;
+        width: 18px;
+        height: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+    }
+
+    .user {
+        display: flex;
+        align-items: center;
+    }
+
+    .user img {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        margin-right: 10px;
+    }
+
+    /* Content */
+    .content {
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        padding: 20px;
+    }
+
+    .page-title {
+        margin-bottom: 20px;
+    }
+
+    .page-title h2 {
+        margin: 0 0 5px 0;
+        color: #2c3e50;
+    }
+
+    .page-title p {
+        margin: 0;
+        color: #7f8c8d;
+    }
+
+    /* Filters */
+    .filters-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        padding: 15px;
+        background-color: #f8f9fa;
+        border-radius: 8px;
+    }
+
+    .filters {
+        display: flex;
+        gap: 15px;
+    }
+
+    .filter-group {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .filter-group label {
+        font-size: 12px;
+        margin-bottom: 5px;
+        color: #7f8c8d;
+    }
+
+    .filter-input {
+        padding: 8px 12px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        min-width: 150px;
+    }
+
+    .date-range {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .date-range span {
+        color: #7f8c8d;
+        font-size: 12px;
+    }
+
+    .date-input {
+        min-width: 120px;
+    }
+
+    .filter-actions {
+        display: flex;
+        gap: 10px;
+    }
+
+    /* Stats */
+    .stats-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        gap: 20px;
+        margin-bottom: 20px;
+    }
+
+    .stat-card {
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        padding: 20px;
+        display: flex;
+        align-items: center;
+    }
+
+    .stat-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 15px;
+        color: #fff;
+        font-size: 20px;
+    }
+
+    .stat-info h3 {
+        margin: 0 0 5px 0;
+        font-size: 24px;
+        color: #2c3e50;
+    }
+
+    .stat-info p {
+        margin: 0;
+        color: #7f8c8d;
+        font-size: 14px;
+    }
+
+    /* Prescriptions List */
+    .prescriptions-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        gap: 20px;
+        margin-bottom: 20px;
+    }
+
+    .prescription-card {
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        overflow: hidden;
+        transition: transform 0.3s, box-shadow 0.3s;
+        cursor: pointer;
+    }
+
+    .prescription-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .prescription-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 15px;
+        border-bottom: 1px solid #e9ecef;
+    }
+
+    .patient-info {
+        display: flex;
+        align-items: center;
+    }
+
+    .patient-info img {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        margin-right: 10px;
+    }
+
+    .patient-info h4 {
+        margin: 0 0 3px 0;
+        font-size: 14px;
+    }
+
+    .patient-info p {
+        margin: 0;
+        font-size: 12px;
+        color: #7f8c8d;
+    }
+
+    .prescription-date {
+        display: flex;
+        align-items: center;
+        color: #7f8c8d;
+        font-size: 12px;
+    }
+
+    .prescription-date i {
+        margin-right: 5px;
+    }
+
+    .prescription-body {
+        padding: 15px;
+    }
+
+    .diagnosis h5, .medications h5 {
+        margin: 0 0 5px 0;
+        font-size: 14px;
+        color: #7f8c8d;
+    }
+
+    .diagnosis p {
+        margin: 0 0 15px 0;
+        font-size: 14px;
+        color: #2c3e50;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .medication-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .medication-list li {
+        font-size: 14px;
+        color: #2c3e50;
+        padding: 3px 0;
+    }
+
+    .more-medications {
+        color: #3498db;
+        font-style: italic;
+    }
+
+    .prescription-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 15px;
+        border-top: 1px solid #e9ecef;
+        background-color: #f8f9fa;
+    }
+
+    .follow-up {
+        display: flex;
+        align-items: center;
+        color: #7f8c8d;
+        font-size: 12px;
+    }
+
+    .follow-up i {
+        margin-right: 5px;
+    }
+
+    .prescription-actions {
+        display: flex;
+        gap: 5px;
+    }
+
+    .btn-icon {
+        width: 32px;
+        height: 32px;
+        border-radius: 4px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: #fff;
+        border: 1px solid #e9ecef;
+        color: #2c3e50;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+
+    .btn-icon:hover {
+        background-color: #e9ecef;
+    }
+
+    /* Empty State */
+    .empty-state {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 50px 20px;
+        text-align: center;
+        grid-column: 1 / -1;
+    }
+
+    .empty-icon {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        background-color: #f8f9fa;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 20px;
+        font-size: 30px;
+        color: #7f8c8d;
+    }
+
+    .empty-state h3 {
+        margin: 0 0 10px 0;
+        color: #2c3e50;
+    }
+
+    .empty-state p {
+        margin: 0 0 20px 0;
+        color: #7f8c8d;
+    }
+
+    /* Pagination */
+    .pagination {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 15px;
+    }
+
+    .pagination-btn {
+        width: 36px;
+        height: 36px;
+        border-radius: 4px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: #fff;
+        border: 1px solid #e9ecef;
+        color: #2c3e50;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+
+    .pagination-btn:hover:not([disabled]) {
+        background-color: #e9ecef;
+    }
+
+    .pagination-btn[disabled] {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    .pagination-info {
+        color: #7f8c8d;
+        font-size: 14px;
+    }
+
+    /* Modal */
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+    }
+
+    .modal-content {
+        background-color: #fff;
+        margin: 5% auto;
+        padding: 20px;
+        border-radius: 8px;
+        width: 700px;
+        max-width: 90%;
+        max-height: 80vh;
+        overflow-y: auto;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        position: relative;
+    }
+
+    .prescription-modal {
+        width: 800px;
+    }
+
+    .close {
+        position: absolute;
+        right: 20px;
+        top: 15px;
+        font-size: 24px;
+        cursor: pointer;
+    }
+
+    /* Prescription View */
+    .prescription-view {
+        padding: 20px;
+        border: 1px solid #e9ecef;
+        border-radius: 8px;
+        background-color: #fff;
+        margin-bottom: 20px;
+    }
+
+    .prescription-header-section {
+        display: flex;
+        justify-content: space-between;
+        padding-bottom: 15px;
+        border-bottom: 2px solid #3498db;
+    }
+
+    .doctor-info h2 {
+        margin: 0 0 5px 0;
+        color: #2c3e50;
+    }
+
+    .doctor-info p {
+        margin: 0 0 3px 0;
+        color: #7f8c8d;
+    }
+
+    .hospital-info {
+        text-align: right;
+    }
+
+    .hospital-info h3 {
+        margin: 0 0 5px 0;
+        color: #2c3e50;
+    }
+
+    .hospital-info p {
+        margin: 0 0 3px 0;
+        color: #7f8c8d;
+    }
+
+    .prescription-title {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin: 20px 0;
+    }
+
+    .prescription-title h1 {
+        margin: 0;
+        color: #3498db;
+        font-size: 24px;
+    }
+
+    .prescription-id {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        font-size: 14px;
+        color: #7f8c8d;
+    }
+
+    .section-title {
+        background-color: #f8f9fa;
+        padding: 8px 15px;
+        font-weight: 500;
+        color: #2c3e50;
+        border-radius: 4px;
+        margin-bottom: 10px;
+    }
+
+    .patient-section, .diagnosis-section, .medications-section, .instructions-section, .follow-up-section {
+        margin-bottom: 20px;
+    }
+
+    .patient-details, .follow-up-details {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 15px;
+        padding: 10px;
+    }
+
+    .detail-group {
+        display: flex;
+        align-items: center;
+    }
+
+    .detail-group label {
+        font-weight: 500;
+        margin-right: 5px;
+        color: #7f8c8d;
+    }
+
+    .medications-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 10px;
+    }
+
+    .medications-table th {
+        background-color: #f8f9fa;
+        padding: 10px;
+        text-align: left;
+        font-weight: 500;
+        color: #2c3e50;
+        border-bottom: 1px solid #e9ecef;
+    }
+
+    .medications-table td {
+        padding: 10px;
+        border-bottom: 1px solid #e9ecef;
+    }
+
+    .signature-section {
+        margin-top: 40px;
+        text-align: right;
+    }
+
+    .signature-line {
+        width: 200px;
+        height: 1px;
+        background-color: #2c3e50;
+        margin-left: auto;
+        margin-bottom: 5px;
+    }
+
+    .signature-section p {
+        margin: 0;
+        color: #7f8c8d;
+        font-size: 14px;
+    }
+
+    .modal-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+    }
+
+    /* Form */
+    .form-section {
+        margin-bottom: 20px;
+    }
+
+    .form-section h3 {
+        margin: 0 0 15px 0;
+        font-size: 16px;
+        color: #2c3e50;
+        padding-bottom: 5px;
+        border-bottom: 1px solid #e9ecef;
+    }
+
+    .form-row {
+        display: flex;
+        gap: 15px;
+        margin-bottom: 15px;
+    }
+
+    .form-group {
+        flex: 1;
+        margin-bottom: 15px;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: 500;
+        color: #2c3e50;
+    }
+
+    .form-input {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+    }
+
+    .medication-item {
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        padding: 15px;
+        margin-bottom: 15px;
+    }
+
+    .form-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        margin-top: 20px;
+    }
+
+    /* Buttons */
+    .btn-primary {
+        background-color: #3498db;
+        color: #fff;
+        border: none;
+        padding: 10px 15px;
+        border-radius: 4px;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .btn-primary:hover {
+        background-color: #2980b9;
+    }
+
+    .btn-secondary {
+        background-color: #95a5a6;
+        color: #fff;
+        border: none;
+        padding: 10px 15px;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+
+    .btn-secondary:hover {
+        background-color: #7f8c8d;
+    }
+
+    .btn-outline {
+        background-color: transparent;
+        color: #555;
+        border: 1px solid #ddd;
+        padding: 10px 15px;
+        border-radius: 4px;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .btn-outline:hover {
+        background-color: #f5f5f5;
+    }
+
+    .btn-add-medication {
+        margin-top: 10px;
+    }
+
+    /* Responsive */
+    @media (max-width: 992px) {
+        .prescriptions-container {
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        }
+
+        .stats-container {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    @media (max-width: 768px) {
+        .main-content {
+            margin-left: 0;
+            padding: 10px;
+        }
+
+        .sidebar {
+            display: none;
+        }
+
+        .filters {
+            flex-direction: column;
+        }
+
+        .date-range {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .stats-container {
+            grid-template-columns: 1fr;
+        }
+
+        .prescriptions-container {
+            grid-template-columns: 1fr;
+        }
+
+        .form-row {
+            flex-direction: column;
+            gap: 0;
+        }
+
+        .patient-details, .follow-up-details {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<script>
+    // Create New Prescription
+    function createNewPrescription() {
+        document.getElementById('edit-modal-title').textContent = 'Create New Prescription';
+        document.getElementById('edit-prescription-id').value = '';
+        document.getElementById('prescription-form').reset();
+        document.getElementById('edit-prescription-modal').style.display = 'block';
+    }
+
+    // View Prescription
+    function viewPrescription(prescriptionId) {
+        // In a real application, you would fetch the prescription details from the server
+        // For now, we'll use dummy data
+        const prescriptionData = {
+            id: 'RX' + prescriptionId.toString().padStart(6, '0'),
+            date: '15 Jun, 2023',
+            patient: {
+                name: 'John Doe',
+                age: '45',
+                gender: 'Male',
+                bloodGroup: 'O+'
+            },
+            diagnosis: 'Hypertension with early signs of cardiovascular strain. Patient presents with elevated blood pressure readings consistently above 140/90 mmHg over the past month.',
+            medications: [
+                {
+                    name: 'Amlodipine',
+                    dosage: '5mg',
+                    frequency: 'Once daily',
+                    duration: '30 days',
+                    instructions: 'Take in the morning with food'
+                },
+                {
+                    name: 'Hydrochlorothiazide',
+                    dosage: '12.5mg',
+                    frequency: 'Once daily',
+                    duration: '30 days',
+                    instructions: 'Take in the morning'
+                },
+                {
+                    name: 'Aspirin',
+                    dosage: '81mg',
+                    frequency: 'Once daily',
+                    duration: 'Ongoing',
+                    instructions: 'Take with food'
+                }
+            ],
+            instructions: 'Maintain a low-sodium diet. Avoid alcohol and caffeine. Monitor blood pressure daily and maintain a log. Increase physical activity gradually, aiming for 30 minutes of moderate exercise most days of the week.',
+            followUp: {
+                date: '15 Jul, 2023',
+                notes: 'Bring blood pressure log and recent lab results'
+            }
+        };
+
+        // Populate modal with data
+        document.getElementById('prescription-id').textContent = 'Prescription ID: ' + prescriptionData.id;
+        document.getElementById('prescription-date').textContent = 'Date: ' + prescriptionData.date;
+        document.getElementById('patient-name').textContent = prescriptionData.patient.name;
+        document.getElementById('patient-age').textContent = prescriptionData.patient.age;
+        document.getElementById('patient-gender').textContent = prescriptionData.patient.gender;
+        document.getElementById('patient-blood').textContent = prescriptionData.patient.bloodGroup;
+        document.getElementById('diagnosis-text').textContent = prescriptionData.diagnosis;
+        document.getElementById('instructions-text').textContent = prescriptionData.instructions;
+        document.getElementById('follow-up-date').textContent = prescriptionData.followUp.date;
+        document.getElementById('follow-up-notes').textContent = prescriptionData.followUp.notes;
+
+        // Populate medications table
+        const medicationsTable = document.getElementById('medications-list');
+        medicationsTable.innerHTML = '';
+        prescriptionData.medications.forEach(med => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${med.name}</td>
+                <td>${med.dosage}</td>
+                <td>${med.frequency}</td>
+                <td>${med.duration}</td>
+                <td>${med.instructions}</td>
+            `;
+            medicationsTable.appendChild(row);
+        });
+
+        // Show modal
+        document.getElementById('view-prescription-modal').style.display = 'block';
+    }
+
+    function closeViewModal() {
+        document.getElementById('view-prescription-modal').style.display = 'none';
+    }
+
+    // Edit Prescription
+    function editPrescription(prescriptionId) {
+        // In a real application, you would fetch the prescription details from the server
+        // and populate the form fields
+        document.getElementById('edit-modal-title').textContent = 'Edit Prescription';
+        document.getElementById('edit-prescription-id').value = prescriptionId;
+        // Populate form fields with prescription data
+        // For now, we'll just show the modal
+        document.getElementById('edit-prescription-modal').style.display = 'block';
+    }
+
+    function editPrescriptionFromModal() {
+        // Get the prescription ID from the view modal
+        const prescriptionId = document.getElementById('prescription-id').textContent.split(':')[1].trim().substring(2);
+        closeViewModal();
+        editPrescription(prescriptionId);
+    }
+
+    function closeEditModal() {
+        document.getElementById('edit-prescription-modal').style.display = 'none';
+    }
+
+    // Print Prescription
+    function printPrescription(prescriptionId) {
+        // In a real application, you would open a print-friendly version of the prescription
+        alert('Printing prescription ' + prescriptionId);
+    }
+
+    function printPrescriptionFromModal() {
+        // In a real application, you would print the current prescription view
+        window.print();
+    }
+
+    // Download PDF
+    function downloadPDF() {
+        // In a real application, you would generate and download a PDF of the prescription
+        alert('Downloading prescription as PDF');
+    }
+
+    // Add Medication
+    document.addEventListener('DOMContentLoaded', function() {
+        const medicationsContainer = document.getElementById('medications-container');
+        const addMedicationBtn = document.querySelector('.btn-add-medication');
+
+        if (addMedicationBtn) {
+            addMedicationBtn.addEventListener('click', function() {
+                const newMedication = document.createElement('div');
+                newMedication.className = 'medication-item';
+                newMedication.innerHTML = `
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Medication</label>
+                            <input type="text" name="medication_name[]" class="form-input" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Dosage</label>
+                            <input type="text" name="medication_dosage[]" class="form-input" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Frequency</label>
+                            <input type="text" name="medication_frequency[]" class="form-input" placeholder="e.g., Twice daily" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Duration</label>
+                            <input type="text" name="medication_duration[]" class="form-input" placeholder="e.g., 7 days" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Instructions</label>
+                        <input type="text" name="medication_instructions[]" class="form-input" placeholder="e.g., Take after meals">
+                    </div>
+                    <button type="button" class="btn-outline btn-remove-medication" style="margin-top: 10px;"><i class="fas fa-trash"></i> Remove</button>
+                `;
+                medicationsContainer.appendChild(newMedication);
+
+                // Add event listener to remove button
+                const removeBtn = newMedication.querySelector('.btn-remove-medication');
+                removeBtn.addEventListener('click', function() {
+                    medicationsContainer.removeChild(newMedication);
+                });
+            });
+        }
+
+        // Patient selection change event
+        const patientSelect = document.getElementById('patient-select');
+        if (patientSelect) {
+            patientSelect.addEventListener('change', function() {
+                const patientId = this.value;
+                if (patientId) {
+                    // In a real application, you would fetch the patient's appointments from the server
+                    // and populate the appointment select dropdown
+                    const appointmentSelect = document.getElementById('appointment-select');
+                    appointmentSelect.innerHTML = '<option value="">-- Select Appointment --</option>';
+                    
+                    // Dummy data for demonstration
+                    const appointments = [
+                        { id: 1, date: '2023-06-10', time: '10:00 AM', reason: 'Regular checkup' },
+                        { id: 2, date: '2023-06-15', time: '02:30 PM', reason: 'Follow-up' },
+                        { id: 3, date: '2023-06-20', time: '11:15 AM', reason: 'Consultation' }
+                    ];
+                    
+                    appointments.forEach(appointment => {
+                        const option = document.createElement('option');
+                        option.value = appointment.id;
+                        option.textContent = `${appointment.date} ${appointment.time} - ${appointment.reason}`;
+                        appointmentSelect.appendChild(option);
+                    });
+                }
+            });
+        }
+    });
+
+    // Close modals when clicking outside
+    window.onclick = function(event) {
+        const viewModal = document.getElementById('view-prescription-modal');
+        const editModal = document.getElementById('edit-prescription-modal');
+        
+        if (event.target == viewModal) {
+            viewModal.style.display = 'none';
+        }
+        
+        if (event.target == editModal) {
+            editModal.style.display = 'none';
+        }
+    };
+</script>
+{% endblock %}

@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Patient Signup | MediConnectX</title>
+  <!-- Font Awesome CDN for Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    body {
+      background-color: #e0e7ff;
+      min-height: 100vh;
+      transition: background 0.3s ease;
+      display: flex;
+      flex-direction: column;
+      margin: 0;
+    }
+    
+    .main-content {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-grow: 1;
+    }
+
+    .container {
+      width: 800px;
+      display: flex;
+      background: #fff;
+      border-radius: 15px;
+      overflow: hidden;
+      box-shadow: 0 0 30px rgba(0,0,0,0.1);
+      position: relative;
+    }
+
+    .left {
+      flex: 1;
+      background: #3b82f6;
+      color: white;
+      padding: 30px 25px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .left img {
+      width: 100%;
+      height: 280px;
+      object-fit: cover;
+      border-radius: 10px;
+      margin-bottom: 20px;
+    }
+
+    .left h2 {
+      font-size: 24px;
+      margin-bottom: 10px;
+    }
+
+    .left p {
+      font-size: 15px;
+      opacity: 0.9;
+    }
+
+    .right {
+      flex: 1;
+      padding: 30px 25px;
+      background-color: #fff;
+      color: #1e293b;
+      transition: background 0.3s ease, color 0.3s ease;
+      position: relative;
+    }
+
+    .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 30px;
+    }
+
+
+    .logo img {
+      width: 30px;
+    }
+
+    .logo h1 {
+      font-size: 22px;
+      color: #3b82f6;
+    }
+
+    h2 {
+      margin-bottom: 10px;
+      font-size: 22px;
+      text-align: center;
+    }
+
+    p.subtitle {
+      text-align: center;
+      margin-bottom: 20px;
+      font-size: 14px;
+      color: #555;
+      transition: color 0.3s ease;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    select, input {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      outline: none;
+      font-size: 14px;
+      background: white;
+      color: black;
+      transition: background 0.3s, color 0.3s;
+    }
+
+    .double-input {
+      display: flex;
+      gap: 15px;
+    }
+
+    .double-input input {
+      flex: 1;
+    }
+
+    .info {
+      font-size: 12px;
+      color: #888;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      transition: color 0.3s;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 12px;
+      background: #16a34a;
+      color: white;
+      font-size: 16px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    .btn:hover {
+      background: #15803d;
+    }
+
+    .login-link {
+      text-align: center;
+      margin-top: 10px;
+      font-size: 14px;
+    }
+
+    .login-link a {
+      color: #3b82f6;
+      text-decoration: none;
+    }
+
+    .theme-toggle {
+      position: absolute;
+      top: 15px;
+      right: 20px;
+      width: 36px;
+      height: 36px;
+      background: #f1f5f9;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    .theme-toggle svg {
+      width: 20px;
+      height: 20px;
+      fill: #1e293b;
+      transition: transform 0.4s ease, fill 0.3s ease;
+    }
+
+    /* Dark Mode */
+    body.dark-mode {
+      background-color: #0f172a;
+    }
+
+    body.dark-mode .container {
+      background-color: #1e293b;
+    }
+
+    body.dark-mode .right {
+      background-color: #1e293b;
+      color: #f1f5f9;
+    }
+
+    body.dark-mode input,
+    body.dark-mode select {
+      background: #334155;
+      color: white;
+      border: 1px solid #475569;
+    }
+
+    body.dark-mode .info {
+      color: #ccc;
+    }
+
+    body.dark-mode .login-link a {
+      color: #38bdf8;
+    }
+
+    body.dark-mode .theme-toggle {
+      background: #334155;
+    }
+
+    body.dark-mode .theme-toggle svg {
+      fill: #f8fafc;
+      transform: rotate(180deg);
+    }
+
+    body.dark-mode .subtitle {
+      color: #cbd5e1;
+    }
+
+    @media(max-width: 768px) {
+      .container {
+        flex-direction: column;
+        width: 95%;
+      }
+      .left img {
+        height: 200px;
+      }
+    }
+  </style>
+</head>
+<body>
+   {% include "homenav.html" %}
+  <div class="main-content">
+    <div class="container">
+    <div class="left">
+      <img src="https://cdn.pixabay.com/photo/2016/03/31/19/56/avatar-1295431_1280.png" alt="Patient">
+      <div>
+        <h2>Patient Registration</h2>
+        <p>Register and get access to top doctors and digital medical records.</p>
+      </div>
+    </div>
+
+    <div class="right">
+      <div class="logo">
+        <img src="https://cdn-icons-png.flaticon.com/512/942/942748.png" alt="logo">
+        <h1>MediConnectX</h1>
+      </div>
+
+      <h2>Create Patient Account</h2>
+      <p class="subtitle">Fill your details to get started</p>
+
+      <form method="POST" action="/patientsignup/">
+        {% csrf_token %}
+        <div class="double-input">
+          <input type="text" name="username" placeholder="Username" required />
+          <input type="text" name="full_name" placeholder="Full Name" required />
+        </div>
+        <input type="email" name="email" placeholder="Email Address" required />
+        <div class="double-input">
+          <input type="tel" name="mobile" placeholder="Mobile Number" required />
+          <input type="text" name="city" placeholder="City" required />
+        </div>
+        <div class="double-input">
+          <input type="password" name="password" placeholder="Password" required />
+          <input type="password" name="confirm_password" placeholder="Confirm Password" required />
+        </div>
+
+        <button type="submit" class="btn">Register as Patient</button>
+      </form>
+
+      <div class="login-link">
+        Already have an account? <a href="/login">Login Here</a>
+      </div>
+    </div>
+  </div>
+  </div>
+</body>
+</html>

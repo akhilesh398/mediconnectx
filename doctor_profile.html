@@ -1,0 +1,1586 @@
+{% extends 'base.html' %}
+
+{% block extra_css %}
+<style>
+    body {
+        background-color: #ffffff;
+        min-height: 100vh;
+    }
+
+    .dashboard-container {
+        display: flex;
+        min-height: 100vh;
+    }
+
+    .sidebar { 
+        width: 250px; 
+        background-color: #2c3e50; 
+        color: #fff; 
+        padding: 20px 0; 
+        position: fixed; 
+        height: 100%; 
+        overflow-y: auto; 
+    } 
+
+
+    .logo { 
+        text-align: center; 
+        padding-bottom: 20px; 
+        border-bottom: 1px solid #3a546a; 
+    } 
+
+
+    .menu-item { 
+        display: block;
+        padding: 10px 20px; 
+        margin: 5px 0;
+        transition: all 0.3s; 
+        color: #fff;
+        text-decoration: none;
+    } 
+
+
+    .menu-item.active { 
+        background-color: #3a546a; 
+        border-left: 4px solid #3498db; 
+    } 
+
+
+    .menu-item i { 
+        margin-right: 10px; 
+        width: 20px; 
+    }
+
+    .main-content {
+        flex: 1;
+        padding: 20px;
+    }
+    
+    .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .user-info {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .user-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background-color: #3b82f6;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: bold;
+    }
+    
+    /* Profile edit styles */
+    .form-control {
+        width: 100%;
+        padding: 8px 12px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 14px;
+    }
+    
+    .btn-success {
+        background-color: #10b981;
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+    
+    .btn-danger {
+        background-color: #ef4444;
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <div class="sidebar">
+        <div class="logo">
+            <img src="https://cdn-icons-png.flaticon.com/512/942/942748.png" alt="logo">
+            <h1>MediConnectX</h1>
+        </div>
+
+        <div style="margin: 20px 0;">
+            <a href="{% url 'doctor_dashboard' %}" class="menu-item">
+                <i class="fas fa-home"></i>
+                <span>Dashboard</span>
+            </a>
+
+            <a href="{% url 'doctor_appointments' %}" class="menu-item">
+                <i class="fas fa-calendar-alt"></i>
+                <span>Appointments</span>
+            </a>
+
+            <a href="{% url 'doctor_patients' %}" class="menu-item">
+                <i class="fas fa-user-injured"></i>
+                <span>Patients</span>
+            </a>
+
+            <a href="{% url 'doctor_prescriptions' %}" class="menu-item">
+                <i class="fas fa-prescription-bottle-alt"></i>
+                <span>Prescriptions</span>
+            </a>
+
+            <a href="{% url 'doctor_profile' %}" class="menu-item active">
+                <i class="fas fa-user"></i>
+                <span>Profile</span>
+            </a>
+        </div>
+
+        <a href="/logout/doctor/" class="logout-btn">
+            <i class="fas fa-sign-out-alt"></i>
+            <span>Logout</span>
+        </a>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Header -->
+        <div class="header">
+            <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" placeholder="Search...">
+            </div>
+            <div class="user-info">
+                <div class="notification">
+                    <i class="fas fa-bell"></i>
+                    <span class="badge">3</span>
+                </div>
+                <div class="user">
+                    <img src="https://via.placeholder.com/40" alt="User">
+                    <span>Dr. {{ doctor.full_name }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Content -->
+        <div class="content">
+            <div class="page-title">
+                <h2>My Profile</h2>
+            </div>
+
+            <div class="profile-container">
+                <!-- Profile Sidebar -->
+                <div class="profile-sidebar">
+                    <div class="profile-image">
+                        {% if doctor.profile_photo %}
+                        <img src="{{ doctor.profile_photo.url }}" alt="{{ doctor.full_name }}">
+                        {% else %}
+                        <img src="https://via.placeholder.com/150" alt="{{ doctor.full_name }}">
+                        {% endif %}
+                        <div class="profile-image-overlay" id="change-photo-btn">
+                            <i class="fas fa-camera"></i>
+                            <span>Change Photo</span>
+                        </div>
+                        <form id="photo-upload-form" style="display: none;" enctype="multipart/form-data" method="post" action="{% url 'doctor_profile' %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="update_photo">
+                            <input type="file" name="profile_photo" id="profile-photo-input" accept="image/*">
+                        </form>
+                    </div>
+                    <h3>Dr. {{ doctor.full_name }}</h3>
+                    <p class="profile-specialization">{{ doctor.specialization }}</p>
+                    <p class="profile-id">Doctor ID: {{ doctor.id }}</p>
+                    <div class="profile-stats">
+                        <div class="stat">
+                            <span class="stat-value">{{ appointments_count }}</span>
+                            <span class="stat-label">Appointments</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-value">{{ patients_count }}</span>
+                            <span class="stat-label">Patients</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-value">{{ prescriptions_count }}</span>
+                            <span class="stat-label">Prescriptions</span>
+                        </div>
+                    </div>
+                    <div class="profile-actions">
+                        <button class="btn-primary" id="edit-profile-btn"><i class="fas fa-edit"></i> Edit Profile</button>
+                        <button class="btn-outline" id="change-password-btn"><i class="fas fa-lock"></i> Change Password</button>
+                        <button class="btn-success" id="save-changes-btn" style="display: none;"><i class="fas fa-save"></i> Save Changes</button>
+                        <button class="btn-danger" id="cancel-edit-btn" style="display: none;"><i class="fas fa-times"></i> Cancel</button>
+                    </div>
+                </div>
+
+                <!-- Profile Content -->
+                <div class="profile-content">
+                    <!-- Profile Tabs -->
+                    <div class="profile-tabs">
+                        <button class="tab-btn active" data-tab="personal-info">Personal Information</button>
+                        <button class="tab-btn" data-tab="professional-info">Professional Information</button>
+                        <button class="tab-btn" data-tab="account-settings">Account Settings</button>
+                    </div>
+
+                    <!-- Tab Content -->
+                        <form id="profile-edit-form" method="post" action="{% url 'doctor_profile' %}" enctype="multipart/form-data">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="update_profile">
+                            <div class="tab-content">
+                        <!-- Personal Information Tab -->
+                        <div class="tab-pane active" id="personal-info">
+                            <div class="info-section">
+                                <h3>Personal Details</h3>
+                                <div class="info-grid">
+                                    <div class="info-item">
+                                        <label>Full Name</label>
+                                        <p class="display-value">{{ doctor.full_name }}</p>
+                                        <div class="edit-field" style="display: none;">
+                                            <input type="text" name="full_name" value="{{ doctor.full_name }}" class="form-control">
+                                        </div>
+                                    </div>
+                                    <div class="info-item">
+                                        <label>Email Address</label>
+                                        <p class="display-value">{{ doctor.email }}</p>
+                                        <div class="edit-field" style="display: none;">
+                                            <input type="email" name="email" value="{{ doctor.email }}" class="form-control">
+                                        </div>
+                                    </div>
+                                    <div class="info-item">
+                                        <label>Phone Number</label>
+                                        <p class="display-value">{{ doctor.phone }}</p>
+                                        <div class="edit-field" style="display: none;">
+                                            <input type="text" name="phone" value="{{ doctor.phone }}" class="form-control">
+                                        </div>
+                                    </div>
+                                    <div class="info-item">
+                                        <label>Date of Birth</label>
+                                        <p class="display-value">{{ doctor.dob|default:"Not provided" }}</p>
+                                        <div class="edit-field" style="display: none;">
+                                            <input type="date" name="dob" value="{{ doctor.dob|date:'Y-m-d' }}" class="form-control">
+                                        </div>
+                                    </div>
+                                    <div class="info-item">
+                                        <label>Gender</label>
+                                        <p class="display-value">{{ doctor.gender|default:"Not provided" }}</p>
+                                        <div class="edit-field" style="display: none;">
+                                            <select name="gender" class="form-control">
+                                                <option value="Male" {% if doctor.gender == "Male" %}selected{% endif %}>Male</option>
+                                                <option value="Female" {% if doctor.gender == "Female" %}selected{% endif %}>Female</option>
+                                                <option value="Other" {% if doctor.gender == "Other" %}selected{% endif %}>Other</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="info-item">
+                                        <label>Blood Group</label>
+                                        <p class="display-value">{{ doctor.blood_group|default:"Not provided" }}</p>
+                                        <div class="edit-field" style="display: none;">
+                                            <select name="blood_group" class="form-control">
+                                                <option value="A+" {% if doctor.blood_group == "A+" %}selected{% endif %}>A+</option>
+                                                <option value="A-" {% if doctor.blood_group == "A-" %}selected{% endif %}>A-</option>
+                                                <option value="B+" {% if doctor.blood_group == "B+" %}selected{% endif %}>B+</option>
+                                                <option value="B-" {% if doctor.blood_group == "B-" %}selected{% endif %}>B-</option>
+                                                <option value="AB+" {% if doctor.blood_group == "AB+" %}selected{% endif %}>AB+</option>
+                                                <option value="AB-" {% if doctor.blood_group == "AB-" %}selected{% endif %}>AB-</option>
+                                                <option value="O+" {% if doctor.blood_group == "O+" %}selected{% endif %}>O+</option>
+                                                <option value="O-" {% if doctor.blood_group == "O-" %}selected{% endif %}>O-</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="info-section">
+                                <h3>Contact Information</h3>
+                                <div class="info-grid">
+                                    <div class="info-item">
+                                        <label>Address</label>
+                                        <p>{{ doctor.address }}</p>
+                                    </div>
+                                    <div class="info-item">
+                                        <label>City</label>
+                                        <p>{{ doctor.city }}</p>
+                                    </div>
+                                    <div class="info-item">
+                                        <label>State</label>
+                                        <p>{{ doctor.state }}</p>
+                                    </div>
+                                    <div class="info-item">
+                                        <label>Postal Code</label>
+                                        <p>{{ doctor.postal_code }}</p>
+                                    </div>
+                                    <div class="info-item">
+                                        <label>Country</label>
+                                        <p>{{ doctor.country }}</p>
+                                    </div>
+                                    <div class="info-item">
+                                        <label>Emergency Contact</label>
+                                        <p>{{ doctor.emergency_contact }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+
+                        <!-- Professional Information Tab -->
+                        <div class="tab-pane" id="professional-info">
+                            <div class="info-section">
+                                <h3>Professional Details</h3>
+                                <div class="info-grid">
+                                    <div class="info-item">
+                                        <label>Specialization</label>
+                                        <p class="display-value">{{ doctor.specialization }}</p>
+                                        <div class="edit-field" style="display: none;">
+                                            <input type="text" name="specialization" value="{{ doctor.specialization }}" class="form-control">
+                                        </div>
+                                    </div>
+                                    <div class="info-item">
+                                        <label>Experience</label>
+                                        <p class="display-value">{{ doctor.experience|default:"0" }} years</p>
+                                        <div class="edit-field" style="display: none;">
+                                            <input type="number" name="experience" value="{{ doctor.experience|default:0 }}" class="form-control" min="0">
+                                        </div>
+                                    </div>
+                                    <div class="info-item">
+                                        <label>License Number</label>
+                                        <p class="display-value">{{ doctor.license_number|default:"Not provided" }}</p>
+                                        <div class="edit-field" style="display: none;">
+                                            <input type="text" name="license_number" value="{{ doctor.license_number }}" class="form-control">
+                                        </div>
+                                    </div>
+                                    <div class="info-item">
+                                        <label>Registration Number</label>
+                                        <p class="display-value">{{ doctor.registration_number|default:"Not provided" }}</p>
+                                        <div class="edit-field" style="display: none;">
+                                            <input type="text" name="registration_number" value="{{ doctor.registration_number }}" class="form-control">
+                                        </div>
+                                    </div>
+                                    <div class="info-item">
+                                        <label>Hospital</label>
+                                        <p class="display-value">{{ doctor.hospital.name|default:"Not assigned" }}</p>
+                                        <div class="edit-field" style="display: none;">
+                                            <select name="hospital" class="form-control">
+                                                <option value="">Select Hospital</option>
+                                                {% for hospital in hospitals %}
+                                                <option value="{{ hospital.id }}" {% if doctor.hospital and doctor.hospital.id == hospital.id %}selected{% endif %}>{{ hospital.name }}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="info-item">
+                                        <label>Department</label>
+                                        <p class="display-value">{{ doctor.department|default:"Not provided" }}</p>
+                                        <div class="edit-field" style="display: none;">
+                                            <input type="text" name="department" value="{{ doctor.department }}" class="form-control">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="info-section">
+                                <h3>Education & Qualifications</h3>
+                                <div class="info-grid">
+                                    <div class="info-item">
+                                        <label>Degree</label>
+                                        <p>{{ doctor.degree }}</p>
+                                    </div>
+                                    <div class="info-item">
+                                        <label>College/University</label>
+                                        <p>{{ doctor.college }}</p>
+                                    </div>
+                                    <div class="info-item">
+                                        <label>Year of Completion</label>
+                                        <p>{{ doctor.year_of_completion }}</p>
+                                    </div>
+                                    <div class="info-item">
+                                        <label>Additional Qualifications</label>
+                                        <p>{{ doctor.additional_qualifications|default:"None" }}</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="info-section">
+                                <h3>Consultation Information</h3>
+                                <div class="info-grid">
+                                    <div class="info-item">
+                                        <label>Consultation Fee</label>
+                                        <p>₹{{ doctor.consultation_fee }}</p>
+                                    </div>
+                                    <div class="info-item">
+                                        <label>Available Days</label>
+                                        <p>{{ doctor.available_days }}</p>
+                                    </div>
+                                    <div class="info-item">
+                                        <label>Available Hours</label>
+                                        <p>{{ doctor.available_hours }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Account Settings Tab -->
+                        <div class="tab-pane" id="account-settings">
+                            <div class="info-section">
+                                <h3>Account Preferences</h3>
+                                <div class="settings-list">
+                                    <div class="settings-item">
+                                        <div class="settings-info">
+                                            <h4>Email Notifications</h4>
+                                            <p>Receive email notifications for appointments, prescriptions, and other updates</p>
+                                        </div>
+                                        <div class="settings-action">
+                                            <label class="switch">
+                                                <input type="checkbox" checked>
+                                                <span class="slider round"></span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="settings-item">
+                                        <div class="settings-info">
+                                            <h4>SMS Notifications</h4>
+                                            <p>Receive SMS alerts for appointment reminders</p>
+                                        </div>
+                                        <div class="settings-action">
+                                            <label class="switch">
+                                                <input type="checkbox" checked>
+                                                <span class="slider round"></span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="settings-item">
+                                        <div class="settings-info">
+                                            <h4>Two-Factor Authentication</h4>
+                                            <p>Add an extra layer of security to your account</p>
+                                        </div>
+                                        <div class="settings-action">
+                                            <label class="switch">
+                                                <input type="checkbox">
+                                                <span class="slider round"></span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="settings-item">
+                                        <div class="settings-info">
+                                            <h4>Profile Visibility</h4>
+                                            <p>Control who can see your profile information</p>
+                                        </div>
+                                        <div class="settings-action">
+                                            <select class="settings-select">
+                                                <option value="public" selected>Public</option>
+                                                <option value="private">Private</option>
+                                                <option value="patients-only">Patients Only</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="info-section">
+                                <h3>Danger Zone</h3>
+                                <div class="danger-zone">
+                                    <div class="danger-item">
+                                        <div class="danger-info">
+                                            <h4>Delete Account</h4>
+                                            <p>Permanently delete your account and all associated data</p>
+                                        </div>
+                                        <div class="danger-action">
+                                            <button class="btn-danger">Delete Account</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Profile Modal -->
+<div id="edit-profile-modal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeEditProfileModal()">&times;</span>
+        <h2>Edit Profile</h2>
+        <form id="edit-profile-form" method="post" action="{% url 'doctor_profile' %}">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="update_profile">
+            <div class="form-tabs">
+                <button type="button" class="form-tab-btn active" data-tab="personal-form">Personal</button>
+                <button type="button" class="form-tab-btn" data-tab="professional-form">Professional</button>
+                <button type="button" class="form-tab-btn" data-tab="consultation-form">Consultation</button>
+            </div>
+            
+            <div class="form-tab-content">
+                <!-- Personal Information Form -->
+                <div class="form-tab-pane active" id="personal-form">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="full_name">Full Name</label>
+                            <input type="text" id="full_name" name="full_name" value="{{ doctor.full_name }}" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="email">Email Address</label>
+                            <input type="email" id="email" name="email" value="{{ doctor.email }}" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="phone">Phone Number</label>
+                            <input type="tel" id="phone" name="phone" value="{{ doctor.phone }}" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="dob">Date of Birth</label>
+                            <input type="date" id="dob" name="dob" value="{{ doctor.dob|date:'Y-m-d' }}" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="gender">Gender</label>
+                            <select id="gender" name="gender" required>
+                                <option value="Male" {% if doctor.gender == 'Male' %}selected{% endif %}>Male</option>
+                                <option value="Female" {% if doctor.gender == 'Female' %}selected{% endif %}>Female</option>
+                                <option value="Other" {% if doctor.gender == 'Other' %}selected{% endif %}>Other</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="blood_group">Blood Group</label>
+                            <select id="blood_group" name="blood_group" required>
+                                <option value="A+" {% if doctor.blood_group == 'A+' %}selected{% endif %}>A+</option>
+                                <option value="A-" {% if doctor.blood_group == 'A-' %}selected{% endif %}>A-</option>
+                                <option value="B+" {% if doctor.blood_group == 'B+' %}selected{% endif %}>B+</option>
+                                <option value="B-" {% if doctor.blood_group == 'B-' %}selected{% endif %}>B-</option>
+                                <option value="AB+" {% if doctor.blood_group == 'AB+' %}selected{% endif %}>AB+</option>
+                                <option value="AB-" {% if doctor.blood_group == 'AB-' %}selected{% endif %}>AB-</option>
+                                <option value="O+" {% if doctor.blood_group == 'O+' %}selected{% endif %}>O+</option>
+                                <option value="O-" {% if doctor.blood_group == 'O-' %}selected{% endif %}>O-</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="address">Address</label>
+                            <input type="text" id="address" name="address" value="{{ doctor.address }}" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="city">City</label>
+                            <input type="text" id="city" name="city" value="{{ doctor.city }}" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="state">State</label>
+                            <input type="text" id="state" name="state" value="{{ doctor.state }}" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="postal_code">Postal Code</label>
+                            <input type="text" id="postal_code" name="postal_code" value="{{ doctor.postal_code }}" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="country">Country</label>
+                            <input type="text" id="country" name="country" value="{{ doctor.country }}" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="emergency_contact">Emergency Contact</label>
+                            <input type="text" id="emergency_contact" name="emergency_contact" value="{{ doctor.emergency_contact }}" required>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Professional Information Form -->
+                <div class="form-tab-pane" id="professional-form">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="specialization">Specialization</label>
+                            <select id="specialization" name="specialization" required>
+                                <option value="Cardiologist" {% if doctor.specialization == 'Cardiologist' %}selected{% endif %}>Cardiologist</option>
+                                <option value="Dermatologist" {% if doctor.specialization == 'Dermatologist' %}selected{% endif %}>Dermatologist</option>
+                                <option value="Neurologist" {% if doctor.specialization == 'Neurologist' %}selected{% endif %}>Neurologist</option>
+                                <option value="Orthopedic" {% if doctor.specialization == 'Orthopedic' %}selected{% endif %}>Orthopedic</option>
+                                <option value="Pediatrician" {% if doctor.specialization == 'Pediatrician' %}selected{% endif %}>Pediatrician</option>
+                                <option value="Psychiatrist" {% if doctor.specialization == 'Psychiatrist' %}selected{% endif %}>Psychiatrist</option>
+                                <option value="Gynecologist" {% if doctor.specialization == 'Gynecologist' %}selected{% endif %}>Gynecologist</option>
+                                <option value="Ophthalmologist" {% if doctor.specialization == 'Ophthalmologist' %}selected{% endif %}>Ophthalmologist</option>
+                                <option value="Dentist" {% if doctor.specialization == 'Dentist' %}selected{% endif %}>Dentist</option>
+                                <option value="General Physician" {% if doctor.specialization == 'General Physician' %}selected{% endif %}>General Physician</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="experience">Experience (years)</label>
+                            <input type="number" id="experience" name="experience" value="{{ doctor.experience }}" min="0" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="license_number">License Number</label>
+                            <input type="text" id="license_number" name="license_number" value="{{ doctor.license_number }}" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="registration_number">Registration Number</label>
+                            <input type="text" id="registration_number" name="registration_number" value="{{ doctor.registration_number }}" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="hospital">Hospital</label>
+                            <select id="hospital" name="hospital" required>
+                                {% for hospital in hospitals %}
+                                    <option value="{{ hospital.id }}" {% if doctor.hospital.id == hospital.id %}selected{% endif %}>{{ hospital.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="department">Department</label>
+                            <input type="text" id="department" name="department" value="{{ doctor.department }}" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="degree">Degree</label>
+                            <input type="text" id="degree" name="degree" value="{{ doctor.degree }}" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="college">College/University</label>
+                            <input type="text" id="college" name="college" value="{{ doctor.college }}" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="year_of_completion">Year of Completion</label>
+                            <input type="number" id="year_of_completion" name="year_of_completion" value="{{ doctor.year_of_completion }}" min="1950" max="2023" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="additional_qualifications">Additional Qualifications</label>
+                            <textarea id="additional_qualifications" name="additional_qualifications" rows="3">{{ doctor.additional_qualifications }}</textarea>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Consultation Information Form -->
+                <div class="form-tab-pane" id="consultation-form">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="consultation_fee">Consultation Fee (₹)</label>
+                            <input type="number" id="consultation_fee" name="consultation_fee" value="{{ doctor.consultation_fee }}" min="0" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="available_days">Available Days</label>
+                            <div class="checkbox-group">
+                                <label><input type="checkbox" name="available_days[]" value="Monday" {% if 'Monday' in doctor.available_days %}checked{% endif %}> Monday</label>
+                                <label><input type="checkbox" name="available_days[]" value="Tuesday" {% if 'Tuesday' in doctor.available_days %}checked{% endif %}> Tuesday</label>
+                                <label><input type="checkbox" name="available_days[]" value="Wednesday" {% if 'Wednesday' in doctor.available_days %}checked{% endif %}> Wednesday</label>
+                                <label><input type="checkbox" name="available_days[]" value="Thursday" {% if 'Thursday' in doctor.available_days %}checked{% endif %}> Thursday</label>
+                                <label><input type="checkbox" name="available_days[]" value="Friday" {% if 'Friday' in doctor.available_days %}checked{% endif %}> Friday</label>
+                                <label><input type="checkbox" name="available_days[]" value="Saturday" {% if 'Saturday' in doctor.available_days %}checked{% endif %}> Saturday</label>
+                                <label><input type="checkbox" name="available_days[]" value="Sunday" {% if 'Sunday' in doctor.available_days %}checked{% endif %}> Sunday</label>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Available Hours</label>
+                            <div class="time-range">
+                                <div class="time-input">
+                                    <label for="start_time">From</label>
+                                    <input type="time" id="start_time" name="start_time" value="{{ doctor.start_time }}" required>
+                                </div>
+                                <div class="time-input">
+                                    <label for="end_time">To</label>
+                                    <input type="time" id="end_time" name="end_time" value="{{ doctor.end_time }}" required>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="bio">Professional Bio</label>
+                            <textarea id="bio" name="bio" rows="5">{{ doctor.bio }}</textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-actions">
+                <button type="button" class="btn-secondary" onclick="closeEditProfileModal()">Cancel</button>
+                <button type="submit" class="btn-primary">Save Changes</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Change Password Modal -->
+<div id="change-password-modal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeChangePasswordModal()">&times;</span>
+        <h2>Change Password</h2>
+        <form id="change-password-form" method="post" action="{% url 'doctor_profile' %}">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="change_password">
+            <div class="form-group">
+                <label for="current_password">Current Password</label>
+                <input type="password" id="current_password" name="current_password" required>
+            </div>
+            <div class="form-group">
+                <label for="new_password">New Password</label>
+                <input type="password" id="new_password" name="new_password" required>
+                <div class="password-strength">
+                    <div class="strength-bar">
+                        <div class="strength-level" id="password-strength-level"></div>
+                    </div>
+                    <span id="password-strength-text">Password strength</span>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="confirm_password">Confirm New Password</label>
+                <input type="password" id="confirm_password" name="confirm_password" required>
+            </div>
+            <div class="form-actions">
+                <button type="button" class="btn-secondary" onclick="closeChangePasswordModal()">Cancel</button>
+                <button type="submit" class="btn-primary">Change Password</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    /* Dashboard Container */
+    .dashboard-container {
+        display: flex;
+        min-height: 100vh;
+        background-color: #f5f5f5;
+    }
+
+    /* Sidebar */
+    .sidebar {
+        width: 250px;
+        background-color: #2c3e50;
+        color: #fff;
+        padding: 20px 0;
+        position: fixed;
+        height: 100%;
+        overflow-y: auto;
+    }
+
+    .logo {
+        text-align: center;
+        padding-bottom: 20px;
+        border-bottom: 1px solid #3a546a;
+    }
+
+    .menu {
+        list-style: none;
+        padding: 0;
+        margin: 20px 0;
+    }
+
+    .menu li {
+        padding: 10px 20px;
+        transition: all 0.3s;
+    }
+
+    .menu li.active {
+        background-color: #3a546a;
+        border-left: 4px solid #3498db;
+    }
+
+    .menu li a {
+        color: #fff;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+    }
+
+    .menu li a i {
+        margin-right: 10px;
+        width: 20px;
+    }
+
+    /* Main Content */
+    .main-content {
+        flex: 1;
+        margin-left: 250px;
+        padding: 20px;
+    }
+
+    /* Header */
+    .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-bottom: 20px;
+        border-bottom: 1px solid #e0e0e0;
+        margin-bottom: 20px;
+    }
+
+    .search-box {
+        display: flex;
+        align-items: center;
+        background-color: #fff;
+        border-radius: 4px;
+        padding: 8px 15px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        width: 300px;
+    }
+
+    .search-box input {
+        border: none;
+        outline: none;
+        margin-left: 10px;
+        width: 100%;
+    }
+
+    .user-info {
+        display: flex;
+        align-items: center;
+    }
+
+    .notification {
+        position: relative;
+        margin-right: 20px;
+    }
+
+    .badge {
+        position: absolute;
+        top: -8px;
+        right: -8px;
+        background-color: #e74c3c;
+        color: #fff;
+        border-radius: 50%;
+        width: 18px;
+        height: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+    }
+
+    .user {
+        display: flex;
+        align-items: center;
+    }
+
+    .user img {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        margin-right: 10px;
+    }
+
+    /* Content */
+    .content {
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        padding: 20px;
+    }
+
+    .page-title {
+        margin-bottom: 20px;
+    }
+
+    .page-title h2 {
+        margin: 0;
+        color: #2c3e50;
+    }
+
+    /* Profile Container */
+    .profile-container {
+        display: flex;
+        gap: 20px;
+    }
+
+    /* Profile Sidebar */
+    .profile-sidebar {
+        width: 300px;
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        padding: 20px;
+        text-align: center;
+    }
+
+    .profile-image {
+        position: relative;
+        width: 150px;
+        height: 150px;
+        margin: 0 auto 20px;
+        border-radius: 50%;
+        overflow: hidden;
+    }
+
+    .profile-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .profile-image-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        color: #fff;
+        opacity: 0;
+        transition: opacity 0.3s;
+        cursor: pointer;
+    }
+
+    .profile-image:hover .profile-image-overlay {
+        opacity: 1;
+    }
+
+    .profile-image-overlay i {
+        font-size: 24px;
+        margin-bottom: 5px;
+    }
+
+    .profile-sidebar h3 {
+        margin: 0 0 5px 0;
+        color: #2c3e50;
+    }
+
+    .profile-specialization {
+        color: #3498db;
+        font-weight: 500;
+        margin: 0 0 10px 0;
+    }
+
+    .profile-id {
+        color: #7f8c8d;
+        margin: 0 0 20px 0;
+        font-size: 14px;
+    }
+
+    .profile-stats {
+        display: flex;
+        justify-content: space-around;
+        margin-bottom: 20px;
+        padding: 15px 0;
+        border-top: 1px solid #ecf0f1;
+        border-bottom: 1px solid #ecf0f1;
+    }
+
+    .stat {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .stat-value {
+        font-size: 20px;
+        font-weight: 600;
+        color: #3498db;
+    }
+
+    .stat-label {
+        font-size: 12px;
+        color: #7f8c8d;
+    }
+
+    .profile-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    /* Profile Content */
+    .profile-content {
+        flex: 1;
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+    }
+
+    /* Profile Tabs */
+    .profile-tabs {
+        display: flex;
+        background-color: #f8f9fa;
+        border-bottom: 1px solid #e9ecef;
+    }
+
+    .tab-btn {
+        padding: 15px 20px;
+        background: none;
+        border: none;
+        cursor: pointer;
+        font-weight: 500;
+        color: #6c757d;
+        position: relative;
+        transition: all 0.3s;
+    }
+
+    .tab-btn:hover {
+        color: #3498db;
+    }
+
+    .tab-btn.active {
+        color: #3498db;
+    }
+
+    .tab-btn.active::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 3px;
+        background-color: #3498db;
+    }
+
+    /* Tab Content */
+    .tab-content {
+        padding: 20px;
+    }
+
+    .tab-pane {
+        display: none;
+    }
+
+    .tab-pane.active {
+        display: block;
+    }
+
+    /* Info Section */
+    .info-section {
+        margin-bottom: 30px;
+    }
+
+    .info-section h3 {
+        margin: 0 0 15px 0;
+        color: #2c3e50;
+        font-size: 18px;
+        border-bottom: 1px solid #e9ecef;
+        padding-bottom: 10px;
+    }
+
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 20px;
+    }
+
+    .info-item {
+        margin-bottom: 15px;
+    }
+
+    .info-item label {
+        display: block;
+        font-weight: 500;
+        color: #6c757d;
+        margin-bottom: 5px;
+        font-size: 14px;
+    }
+
+    .info-item p {
+        margin: 0;
+        color: #2c3e50;
+    }
+
+    /* Settings List */
+    .settings-list {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .settings-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 15px;
+        background-color: #f8f9fa;
+        border-radius: 8px;
+    }
+
+    .settings-info {
+        flex: 1;
+    }
+
+    .settings-info h4 {
+        margin: 0 0 5px 0;
+        color: #2c3e50;
+    }
+
+    .settings-info p {
+        margin: 0;
+        color: #6c757d;
+        font-size: 14px;
+    }
+
+    .settings-action {
+        margin-left: 20px;
+    }
+
+    /* Switch Toggle */
+    .switch {
+        position: relative;
+        display: inline-block;
+        width: 50px;
+        height: 24px;
+    }
+
+    .switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+
+    .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #ccc;
+        transition: .4s;
+    }
+
+    .slider:before {
+        position: absolute;
+        content: "";
+        height: 16px;
+        width: 16px;
+        left: 4px;
+        bottom: 4px;
+        background-color: white;
+        transition: .4s;
+    }
+
+    input:checked + .slider {
+        background-color: #3498db;
+    }
+
+    input:focus + .slider {
+        box-shadow: 0 0 1px #3498db;
+    }
+
+    input:checked + .slider:before {
+        transform: translateX(26px);
+    }
+
+    .slider.round {
+        border-radius: 24px;
+    }
+
+    .slider.round:before {
+        border-radius: 50%;
+    }
+
+    /* Settings Select */
+    .settings-select {
+        padding: 8px 12px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        background-color: #fff;
+        min-width: 120px;
+    }
+
+    /* Danger Zone */
+    .danger-zone {
+        background-color: #fff5f5;
+        border: 1px solid #fed7d7;
+        border-radius: 8px;
+        padding: 15px;
+    }
+
+    .danger-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .danger-info h4 {
+        margin: 0 0 5px 0;
+        color: #e53e3e;
+    }
+
+    .danger-info p {
+        margin: 0;
+        color: #6c757d;
+        font-size: 14px;
+    }
+
+    .btn-danger {
+        background-color: #e53e3e;
+        color: #fff;
+        border: none;
+        padding: 8px 15px;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+
+    .btn-danger:hover {
+        background-color: #c53030;
+    }
+
+    /* Buttons */
+    .btn-primary {
+        background-color: #3498db;
+        color: #fff;
+        border: none;
+        padding: 10px 15px;
+        border-radius: 4px;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 5px;
+        width: 100%;
+    }
+
+    .btn-primary:hover {
+        background-color: #2980b9;
+    }
+
+    .btn-secondary {
+        background-color: #95a5a6;
+        color: #fff;
+        border: none;
+        padding: 10px 15px;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+
+    .btn-secondary:hover {
+        background-color: #7f8c8d;
+    }
+
+    .btn-outline {
+        background-color: transparent;
+        color: #555;
+        border: 1px solid #ddd;
+        padding: 10px 15px;
+        border-radius: 4px;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 5px;
+        width: 100%;
+    }
+
+    .btn-outline:hover {
+        background-color: #f5f5f5;
+    }
+
+    /* Modal */
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+    }
+
+    .modal-content {
+        background-color: #fff;
+        margin: 5% auto;
+        padding: 20px;
+        border-radius: 8px;
+        width: 700px;
+        max-width: 90%;
+        max-height: 80vh;
+        overflow-y: auto;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        position: relative;
+    }
+
+    .close {
+        position: absolute;
+        right: 20px;
+        top: 15px;
+        font-size: 24px;
+        cursor: pointer;
+    }
+
+    /* Form Tabs */
+    .form-tabs {
+        display: flex;
+        margin-bottom: 20px;
+        border-bottom: 1px solid #e9ecef;
+    }
+
+    .form-tab-btn {
+        padding: 10px 20px;
+        background: none;
+        border: none;
+        cursor: pointer;
+        font-weight: 500;
+        color: #6c757d;
+        position: relative;
+    }
+
+    .form-tab-btn.active {
+        color: #3498db;
+    }
+
+    .form-tab-btn.active::after {
+        content: '';
+        position: absolute;
+        bottom: -1px;
+        left: 0;
+        width: 100%;
+        height: 2px;
+        background-color: #3498db;
+    }
+
+    .form-tab-content {
+        margin-bottom: 20px;
+    }
+
+    .form-tab-pane {
+        display: none;
+    }
+
+    .form-tab-pane.active {
+        display: block;
+    }
+
+    /* Form Grid */
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 15px;
+    }
+
+    .form-group {
+        margin-bottom: 15px;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: 500;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+    }
+
+    .form-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        margin-top: 20px;
+    }
+
+    /* Checkbox Group */
+    .checkbox-group {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+        gap: 10px;
+    }
+
+    .checkbox-group label {
+        display: flex;
+        align-items: center;
+        font-weight: normal;
+    }
+
+    .checkbox-group input[type="checkbox"] {
+        width: auto;
+        margin-right: 5px;
+    }
+
+    /* Time Range */
+    .time-range {
+        display: flex;
+        gap: 15px;
+    }
+
+    .time-input {
+        flex: 1;
+    }
+
+    .time-input label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: 500;
+    }
+
+    /* Password Strength */
+    .password-strength {
+        margin-top: 10px;
+    }
+
+    .strength-bar {
+        height: 5px;
+        background-color: #e9ecef;
+        border-radius: 5px;
+        margin-bottom: 5px;
+    }
+
+    .strength-level {
+        height: 100%;
+        width: 0;
+        border-radius: 5px;
+        transition: width 0.3s, background-color 0.3s;
+    }
+
+    /* Responsive */
+    @media (max-width: 992px) {
+        .profile-container {
+            flex-direction: column;
+        }
+
+        .profile-sidebar {
+            width: 100%;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .form-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .info-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .time-range {
+            flex-direction: column;
+            gap: 10px;
+        }
+    }
+</style>
+
+<script>
+    // Tab Switching
+    document.addEventListener('DOMContentLoaded', function() {
+        // Profile Tabs
+        const tabBtns = document.querySelectorAll('.tab-btn');
+        const tabPanes = document.querySelectorAll('.tab-pane');
+
+        tabBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                // Remove active class from all buttons and panes
+                tabBtns.forEach(b => b.classList.remove('active'));
+                tabPanes.forEach(p => p.classList.remove('active'));
+
+                // Add active class to clicked button and corresponding pane
+                this.classList.add('active');
+                const tabId = this.getAttribute('data-tab');
+                document.getElementById(tabId).classList.add('active');
+            });
+        });
+
+        // Form Tabs
+        const formTabBtns = document.querySelectorAll('.form-tab-btn');
+        const formTabPanes = document.querySelectorAll('.form-tab-pane');
+
+        formTabBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                // Remove active class from all buttons and panes
+                formTabBtns.forEach(b => b.classList.remove('active'));
+                formTabPanes.forEach(p => p.classList.remove('active'));
+
+                // Add active class to clicked button and corresponding pane
+                this.classList.add('active');
+                const tabId = this.getAttribute('data-tab');
+                document.getElementById(tabId).classList.add('active');
+            });
+        });
+
+        // Edit Profile Modal
+        const editProfileBtn = document.getElementById('edit-profile-btn');
+        const editProfileModal = document.getElementById('edit-profile-modal');
+
+        editProfileBtn.addEventListener('click', function() {
+            editProfileModal.style.display = 'block';
+        });
+
+        // Change Password Modal
+        const changePasswordBtn = document.getElementById('change-password-btn');
+        const changePasswordModal = document.getElementById('change-password-modal');
+
+        changePasswordBtn.addEventListener('click', function() {
+            changePasswordModal.style.display = 'block';
+        });
+
+        // Password Strength Meter
+        const newPasswordInput = document.getElementById('new_password');
+        const strengthLevel = document.getElementById('password-strength-level');
+        const strengthText = document.getElementById('password-strength-text');
+
+        newPasswordInput.addEventListener('input', function() {
+            const password = this.value;
+            let strength = 0;
+            let strengthMessage = '';
+
+            if (password.length >= 8) strength += 1;
+            if (password.match(/[a-z]/) && password.match(/[A-Z]/)) strength += 1;
+            if (password.match(/\d/)) strength += 1;
+            if (password.match(/[^a-zA-Z\d]/)) strength += 1;
+
+            switch (strength) {
+                case 0:
+                    strengthLevel.style.width = '0%';
+                    strengthLevel.style.backgroundColor = '#e74c3c';
+                    strengthMessage = 'Very Weak';
+                    break;
+                case 1:
+                    strengthLevel.style.width = '25%';
+                    strengthLevel.style.backgroundColor = '#e74c3c';
+                    strengthMessage = 'Weak';
+                    break;
+                case 2:
+                    strengthLevel.style.width = '50%';
+                    strengthLevel.style.backgroundColor = '#f39c12';
+                    strengthMessage = 'Fair';
+                    break;
+                case 3:
+                    strengthLevel.style.width = '75%';
+                    strengthLevel.style.backgroundColor = '#3498db';
+                    strengthMessage = 'Good';
+                    break;
+                case 4:
+                    strengthLevel.style.width = '100%';
+                    strengthLevel.style.backgroundColor = '#2ecc71';
+                    strengthMessage = 'Strong';
+                    break;
+            }
+
+            strengthText.textContent = strengthMessage;
+        });
+
+        // Confirm Password Validation
+        const confirmPasswordInput = document.getElementById('confirm_password');
+        const changePasswordForm = document.getElementById('change-password-form');
+
+        changePasswordForm.addEventListener('submit', function(e) {
+            if (newPasswordInput.value !== confirmPasswordInput.value) {
+                e.preventDefault();
+                alert('Passwords do not match!');
+            }
+        });
+    });
+
+    // Close Modals
+    function closeEditProfileModal() {
+        document.getElementById('edit-profile-modal').style.display = 'none';
+    }
+
+    function closeChangePasswordModal() {
+        document.getElementById('change-password-modal').style.display = 'none';
+    }
+
+    // Close modals when clicking outside of them
+    window.onclick = function(event) {
+        const editProfileModal = document.getElementById('edit-profile-modal');
+        const changePasswordModal = document.getElementById('change-password-modal');
+        
+        if (event.target == editProfileModal) {
+            editProfileModal.style.display = 'none';
+        }
+        
+        if (event.target == changePasswordModal) {
+            changePasswordModal.style.display = 'none';
+        }
+    }
+</script>
+{% endblock %}
